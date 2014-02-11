@@ -1,0 +1,32 @@
+@(zakForm: play.api.data.Form[model.Zak], call: play.api.mvc.Call, tridy: Seq[model.views.Selectable])(implicit flash: Flash)
+
+@import model.views._
+@import model.views.helper._
+
+@main("Docházka") {
+	
+	@views.html.helper.error(zakForm)
+	
+	<form class="form-horizontal" action="@call" method="post">
+		<fieldset>
+			<legend>@Messages("legend.zak.edit")</legend>
+			<div class="form-group">
+				@views.html.bootstrap3.hidden(zakForm("uuidZak"))
+				@views.html.bootstrap3.text(zakForm("jmeno"), ColumnWidth(2,5))
+		    </div>
+			<div class="form-group">
+				@views.html.bootstrap3.text(zakForm("prijmeni"), ColumnWidth(2,5))
+		    </div>
+			<div class="form-group">
+				@views.html.bootstrap3.select(zakForm("uuidTrida"),	tridy, ColumnWidth(2,5))
+		    </div>
+		    
+			<div class="form-group">
+				<div class="col-xs-7 text-right">
+					<a class="btn btn-default" href="@routes.ZakController.edit">@Messages("prerusit")</a>
+					<button class="btn btn-success" name="submit" type="submit">@Messages("zak.update")</button>
+				</div>
+			</div>
+		</fieldset>
+	</form>
+}

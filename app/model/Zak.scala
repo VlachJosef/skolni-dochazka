@@ -8,6 +8,11 @@ case class Zak(uuidZak: Option[UUID], jmeno: String, prijmeni: String, uuidTrida
 
 object Zak {
 
+  def exists(uuidZak: String, client: Jedis): Boolean = {
+    val sedis = Dress.up(client)
+    sedis.sismember("zaci", uuidZak)
+  }
+
   def getByUUIDTrida(uuidTrida: String, client: Jedis): Set[Zak] =  {
     val sedis = Dress.up(client)
     val zaci = sedis.smembers(uuidTrida)
@@ -22,9 +27,13 @@ object Zak {
     Zak(Some(UUID.fromString(uuidZak)), jmeno, prijmeni, uuidTridy)
   }
 
-  def deleteByUUIDZak(uuidZak: String, client: Jedis) = {
+  def deleteByUUIDZak(uuidZak: String, client: Jedis): Zak = {
     val sedis = Dress.up(client)
+    val zak = getByUUIDZak(uuidZak, client)
+    val uuidTrida = sedis.hget(s"zak:$uuidZak", "uuidTridy")
+    sedis.srem(uuidTrida, uuidZak)
     sedis.srem("zaci", uuidZak)
     client.del(s"zak:$uuidZak")
+    zak
   }
 }

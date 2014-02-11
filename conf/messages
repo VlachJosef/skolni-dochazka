@@ -18,11 +18,15 @@ jmeno=Jméno
 prijmeni=Příjmení
 uuidTrida=Třída
 zak.save=Založit žáka
+zak.update=Upravit žáka
 title.zaci=Žáci:
 
 question.delete.tridy=Smazáním třídy dojde i ke smazání všech žáků. Přejete si pokračovat?
+question.delete.zak=Opravdu si přejete smazat žáka?
 success.delete.tridy=Třída {0} byla úspěšně odstraněna
-success.zmena.nazev.tridy=Název třídy {0} změněn na {1} 
+success.zmena.nazev.tridy=Název třídy {0} změněn na {1}
+success.delete.zak=Žák {0} byl úspěšně odstraněn
 error.minLength=Položka {0} musí být alespoň {1} znaků dlouhá
 error.already.exists={0} {1} již existuje
 error.trida.nenalezena=Třída s uuid {0} nenalezena
+error.zak.nenalezen=Žák s {0} nenalezen

@@ -1,13 +1,10 @@
 package controllers
 
 import java.util.UUID
-
 import org.sedis.Dress
 import org.sedis.Dress.delegateToJedis
-
 import com.typesafe.plugin.RedisPlugin
 import com.typesafe.plugin.use
-
 import model.Trida
 import model.Zak
 import model.mappings.UUIDMapping
@@ -20,6 +17,11 @@ import play.api.data.Forms.nonEmptyText
 import play.api.data.Forms.optional
 import play.api.mvc.Action
 import play.api.mvc.Controller
+import model.Skola
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
+import play.api.i18n.Messages
 
 object ZakController extends Controller {
 
@@ -62,6 +64,89 @@ object ZakController extends Controller {
   }
 
   def edit = Action {
-    Ok("Zak edit")
+    val pool = use[RedisPlugin].sedisPool
+    pool.withJedisClient { client =>
+      val skola = Skola.getSkola(client)
+      Ok(views.html.zak.edit(skola))
+    }
+  }
+
+  def editZak(uuidZak: String) = Action { implicit request =>
+    val pool = use[RedisPlugin].sedisPool
+    pool.withJedisClient { client =>
+      val zak = Zak.getByUUIDZak(uuidZak, client)
+      Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy()))
+    }
+  }
+
+  def update = Action { implicit request =>
+    val form = zakForm.bindFromRequest
+    form.fold(
+      formWithErrors => {
+        Ok(views.html.zak.update(formWithErrors, routes.ZakController.update, Application.getSelectableTridy()))
+      },
+      zak => {
+        val pool = use[RedisPlugin].sedisPool
+        pool.withJedisClient { client =>
+          val uuidZak = zak.uuidZak.get.toString
+
+          val sedis = Dress.up(client)
+
+          if (sedis.sismember("zaci", zak.uuidZak.get.toString)) {
+            sedis.hset(s"zak:$uuidZak", "jmeno", zak.jmeno)
+            sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni)
+
+            println("$uuidZak " + uuidZak)
+
+            val oldUUIDTridy = sedis.hget(s"zak:$uuidZak", "uuidTridy")
+            val uuidTrida = zak.uuidTrida.toString
+            if (oldUUIDTridy != uuidTrida) {
+              sedis.hset(s"zak:$uuidZak", "uuidTridy", uuidTrida)
+              sedis.srem(oldUUIDTridy, uuidZak) // presuneme zaka z puvodni tridy...
+              sedis.sadd(uuidTrida, uuidZak) // ... do nove tridy
+            }
+          }
+          Redirect(routes.ZakController.edit())
+        }
+      })
+  }
+
+  implicit object UUIDFormat extends Format[UUID] {
+    def writes(uuid: UUID): JsValue = JsString(uuid.toString())
+    def reads(json: JsValue): JsResult[UUID] = json match {
+      case JsString(x) => JsSuccess(UUID.fromString(x))
+      case _ => JsError("Expected UUID as JsString")
+    }
+  }
+
+  implicit val zakReads: Reads[String] =
+    (JsPath \ "uuidZak").read[String]
+
+  def delete = Action(parse.json) { implicit request =>
+    request.body.validate[String](zakReads).map { uuidZak =>
+      {
+        val pool = use[RedisPlugin].sedisPool
+        pool.withJedisClient { client =>
+          if (Zak.exists(uuidZak, client)) {
+            val zak = Zak.deleteByUUIDZak(uuidZak, client)
+            Ok(Json.obj(
+              "uuidZak" -> uuidZak,
+              "message" -> Messages("success.delete.zak", zak.jmeno + " " + zak.prijmeni)))
+          } else {
+            BadRequest(Json.obj("message" -> Messages("error.zak.nenalezen", uuidZak)))
+          }
+        }
+      }
+    }.recoverTotal { e =>
+      {
+        val errors = e.errors.map(fieldError => {
+          val path = fieldError._1
+          fieldError._2.map(valError => {
+            Messages(valError.message, path.toString, valError.args(0))
+          })
+        }).flatten
+        BadRequest(Json.obj("message" -> errors))
+      }
+    }
   }
 }

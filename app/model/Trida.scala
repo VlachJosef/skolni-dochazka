@@ -13,8 +13,7 @@ object Trida {
     val nazvyTrid = sedis.sort("tridy", new SortingParams().alpha().asc())
     nazvyTrid.map(
       nazevTridy => Trida(
-        Some(UUID.fromString(sedis.hget(s"trida:$nazevTridy", "uuid"))),
-        nazevTridy))
+        Some(UUID.fromString(sedis.hget(s"trida:$nazevTridy", "uuid"))), nazevTridy))
   }
 
   def getByUUID(uuidTrida: String, client: Jedis) = {
@@ -31,7 +30,7 @@ object Trida {
     client.del(s"trida:$nazev")
     client.del(s"trida:$uuidTrida")
     val zaci = sedis.smembers(uuidTrida)
-    zaci.foreach(zak=>Zak.deleteByUUIDZak(zak, client))
+    zaci.foreach(zak => Zak.deleteByUUIDZak(zak, client))
     client.del(uuidTrida)
   }
 }

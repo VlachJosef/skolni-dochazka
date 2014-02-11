@@ -18,17 +18,7 @@ object Application extends Controller {
   def index = Action {
     val pool = use[RedisPlugin].sedisPool
     val skola = pool.withJedisClient { client =>
-      val tridy = Trida.getAll(client)
-      val sedis = Dress.up(client)
-
-      val SlozeniTrid = tridy.map(trida => {
-        val zaciUuid = sedis.smembers(trida.uuidTrida.get.toString)
-        val zaci = zaciUuid.map(uuidZak => {
-          Zak.getByUUIDZak(uuidZak, client)
-        })
-        SlozeniTridy(trida, zaci)
-      })
-      Skola(SlozeniTrid)
+      Skola.getSkola(client)
     }
     Ok(views.html.index(skola))
   }
@@ -44,7 +34,8 @@ object Application extends Controller {
     val routes = Routes.javascriptRouter("appRoutes")(
       controllers.routes.javascript.TridaController.editTrida,
       controllers.routes.javascript.TridaController.update,
-      controllers.routes.javascript.TridaController.delete)
+      controllers.routes.javascript.TridaController.delete,
+      controllers.routes.javascript.ZakController.delete)
     Ok(routes).as("text/javascript")
   }
 }

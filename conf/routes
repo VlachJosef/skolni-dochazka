@@ -14,6 +14,9 @@ DELETE	/trida						controllers.TridaController.delete
 GET		/zak/novy				 	controllers.ZakController.create
 GET		/zak/uprav				 	controllers.ZakController.edit
 POST	/zak				 		controllers.ZakController.save
+GET		/zak/:uuidZak	 			controllers.ZakController.editZak(uuidZak)
+POST	/zak/update		 			controllers.ZakController.update
+DELETE	/zak						controllers.ZakController.delete
 
 GET   	/assets/js/routes           controllers.Application.jsRoutes()
 
