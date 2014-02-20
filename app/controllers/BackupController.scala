@@ -27,13 +27,13 @@ object BackupController extends Controller {
   val dumpsDirName = "dumps"
 
   def backup = Action {
-    val backupDir = new File(dumpsDirName)
-    if (backupDir.exists && backupDir.isDirectory) {
-      val dumpFiles = backupDir.listFiles();
-      val backupNames = dumpFiles.map(key => key.getName)
-      Ok(views.html.backup.backup(backupNames))
-    } else {
-      Ok("error pri nacitani backupu ")
+    getOrCreateDumpsDir() match {
+      case Some(dir) => {
+        val dumpFiles = dir.listFiles();
+        val backupNames = dumpFiles.map(key => key.getName)
+        Ok(views.html.backup.backup(backupNames))
+      }
+      case None => Ok("error pri nacitani backupu")
     }
   }
 
@@ -41,21 +41,39 @@ object BackupController extends Controller {
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val keys = client.keys("*")
-      val dir = new File("dumps");
-      if ((dir.exists && dir.isDirectory) || dir.mkdir) {
-        val localDateDir = new File(dir.getPath + "/" + LocalDateTime.now.toString)
-        localDateDir.mkdir
-        keys.asScala.map(key => {
-          val dump = client.dump(key)
-          val fos: FileOutputStream = new FileOutputStream(localDateDir.getPath + "/" + key)
-          fos.write(dump, 0, dump.length);
-          fos.flush();
-          fos.close();
-        })
-        Redirect(routes.BackupController.backup)
-      } else {
-        Ok("failed trying to create the directory for dump");
+      getOrCreateDumpsDir() match {
+        case Some(dir) => {
+          val localDateDir = new File(dir.getPath + "/" + LocalDateTime.now.toString)
+          localDateDir.mkdir
+          keys.asScala.map(key => {
+            val dump = client.dump(key)
+            val fos: FileOutputStream = new FileOutputStream(localDateDir.getPath + "/" + key)
+            fos.write(dump, 0, dump.length);
+            fos.flush();
+            fos.close();
+          })
+          Redirect(routes.BackupController.backup)
+        }
+        case None => Ok("failed trying to create the directory for dump")
       }
+    }
+  }
+
+  private def getOrCreateDumpsDir(): Option[File] = {
+    val dir = new File(dumpsDirName);
+    if ((dir.exists && dir.isDirectory) || dir.mkdir) {
+      Some(dir)
+    } else {
+      None
+    }
+  }
+
+  private def getIfExistsBackupDir(backupDir: String): Option[File] = {
+    val dir = new File(dumpsDirName + "/" + backupDir)
+    if ((dir.exists && dir.isDirectory)) {
+      Some(dir)
+    } else {
+      None
     }
   }
 
@@ -63,19 +81,20 @@ object BackupController extends Controller {
     request.body.validate[String](backupReads).map { backup =>
       val pool = use[RedisPlugin].sedisPool
       pool.withJedisClient { client =>
-        val backupDir = new File("dumps/" + backup)
-        if (backupDir.exists && backupDir.isDirectory) {
-          client.flushDB
-          val dumpFiles = backupDir.listFiles();
-          dumpFiles.foreach(key => {
-            val ss = scala.io.Source.fromFile(key, "ISO8859-1")
-            val keyContents = ss.map(_.toByte).toArray
-            client.restore(key.getName, 0, keyContents)
-            ss.close
-          })
-          Ok(Json.obj("message" -> Messages("success.restore.backup", backup)))
-        } else {
-          BadRequest(Json.obj("message" -> "Chyba při obnovování zálohy"))
+        getIfExistsBackupDir(backup) match {
+          case Some(dir) => {
+            client.flushDB
+            val dumpFiles = dir.listFiles();
+            dumpFiles.foreach(key => {
+              val ss = scala.io.Source.fromFile(key, "ISO8859-1")
+              val keyContents = ss.map(_.toByte).toArray
+              client.restore(key.getName, 0, keyContents)
+              ss.close
+            })
+            Ok(Json.obj("message" -> Messages("success.restore.backup", backup)))
+          }
+          case None =>
+            BadRequest(Json.obj("message" -> "Chyba při obnovování zálohy"))
         }
       }
     }.recoverTotal { e =>
@@ -88,16 +107,17 @@ object BackupController extends Controller {
 
   def delete = Action(parse.json) { implicit request =>
     request.body.validate[String](backupReads).map { backup =>
-      val backupDir = new File("dumps/" + backup)
-      if (backupDir.exists && backupDir.isDirectory) {
-        val dumpFiles = backupDir.listFiles();
-        dumpFiles.foreach(key => {
-          key.delete
-        })
-        backupDir.delete
-        Ok(Json.obj("message" -> Messages("success.delete.backup", backup)))
-      } else {
-        BadRequest(Json.obj("message" -> "Chyba při mazání zálohy"))
+      getIfExistsBackupDir(backup) match {
+        case Some(dir) => {
+          val dumpFiles = dir.listFiles();
+          dumpFiles.foreach(key => {
+            key.delete
+          })
+          dir.delete
+          Ok(Json.obj("message" -> Messages("success.delete.backup", backup)))
+        }
+        case None =>
+          BadRequest(Json.obj("message" -> "Chyba při mazání zálohy"))
       }
     }.recoverTotal { e =>
       BadRequest(Json.obj("message" -> e.toString))

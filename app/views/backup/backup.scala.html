@@ -19,6 +19,9 @@
 			</div>
 			<div class="panel-body">
 	          	<ul>
+	          		@if(backups.length == 0) {
+	          			<li>Žádná záloha není k dispozici</li>
+	          		}
 	 				@for(backup <- backups) {
 						<li id="cont-@OneTimeHelper.escapeDateString(backup)">
 							@backup
