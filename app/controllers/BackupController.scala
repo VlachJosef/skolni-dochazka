@@ -44,7 +44,7 @@ object BackupController extends Controller with DochazkaSecured {
       getOrCreateDumpsDir().map(dir => {
         val localDateDir = new File(dir.getPath + "/" + LocalDateTime.now.toString)
         localDateDir.mkdir
-        keys.asScala.map(key => {
+        keys.asScala.filter(client.pttl(_) == -1).foreach(key => {
           val dump = client.dump(key)
           val fos: FileOutputStream = new FileOutputStream(localDateDir.getPath + "/" + key)
           fos.write(dump, 0, dump.length);
