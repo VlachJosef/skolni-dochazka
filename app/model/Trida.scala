@@ -22,6 +22,15 @@ object Trida {
     Trida(Some(UUID.fromString(uuidTrida)), nazev)
   }
 
+  def getMaxPoradoveCisloZak(uuidTrida: String, client: Jedis): Int ={
+    val zaci = Zak.getByUUIDTrida(uuidTrida, client)
+    println(zaci)
+    zaci.reverse match {
+      case head :: xs => head.poradoveCislo + 1
+      case _ => 1
+    }
+  }
+
   def deleteByUUID(uuidTrida: String, client: Jedis) = {
 
     val sedis = Dress.up(client)

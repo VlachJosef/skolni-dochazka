@@ -27,6 +27,7 @@ import org.joda.time.LocalDate
 import model.Pritomnost
 import play.api.i18n.Messages
 import model.DochazkaUpdate
+import com.github.nscala_time.time.Implicits._
 
 object DochazkaController extends Controller with DochazkaSecured {
 
@@ -47,12 +48,14 @@ object DochazkaController extends Controller with DochazkaSecured {
     Ok(views.html.summary(skola))
   }
 
+  val formatter = DateTimeFormat.forPattern("dd.MM.yyyy")
+
   def prehledByUUIDTrida(uuidTrida: String) = Action { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val trida = Trida.getByUUID(uuidTrida, client)
       val zaci = Zak.getByUUIDTrida(uuidTrida, client);
-      val dny = Dochazka.getDnyDochazkyByUUidTrida(uuidTrida, client)
+      val dny = Dochazka.getDnyDochazkyByUUidTrida(uuidTrida, client).toList.sortBy(formatter.parseLocalDate(_))
 
       val chartsData = zaci.map(zak => {
         val denPocetHodin = for (
@@ -61,14 +64,20 @@ object DochazkaController extends Controller with DochazkaSecured {
           val pocetHodin = client.get(s"dochazka:$den:${zak.uuidZak.get.toString}")
           (den, pocetHodin)
         }
-        val dnyList = denPocetHodin.map(_._1).toList.sortBy(_.toString).map("'" + _ + "'")
-        val dochazkaList = denPocetHodin.map(_._2).toList
-        val dochazkaListDouble = dochazkaList.map(pocetHodin => pocetHodin.toDouble)
-        val kumulativniAbsenceData = for (i <- 1 to dochazkaListDouble.size) yield {
-          val x = dochazkaListDouble.take(i)
-          x.foldLeft(0.0)(_ + _)
+        val dnyList = denPocetHodin.map(_._1).map("'" + _ + "'")
+        val dochazkaList = denPocetHodin.map(_._2.toInt).toList
+        val kumulativniAbsenceData = for (i <- 1 to dochazkaList.size) yield {
+          val x = dochazkaList.take(i)
+          x.foldLeft(0)((acc, i) => acc + (4 - i))
         }
-        Chart(zak, dnyList.mkString(","), dochazkaList.mkString(","), kumulativniAbsenceData.mkString(","))
+        val absenceAndHodiny = kumulativniAbsenceData.toList match {
+          case head :: xs =>
+            val zameskaneHodiny = kumulativniAbsenceData.reverse.head
+        	val absence = (((zameskaneHodiny.toDouble*100.0)/(dochazkaList.size.toDouble * 4.0) * 100.0).toInt/100.0)
+        	(absence, zameskaneHodiny)
+          case _ => (0.0, 0)
+        }
+        Chart(zak, dnyList.mkString(","), dochazkaList.mkString(","), kumulativniAbsenceData.mkString(","), absenceAndHodiny._1, absenceAndHodiny._2)
       })
       Ok(views.html.dochazka.records(trida, chartsData))
     }

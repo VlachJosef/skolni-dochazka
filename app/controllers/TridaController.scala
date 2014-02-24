@@ -65,7 +65,7 @@ object TridaController extends Controller with DochazkaSecured {
             val uuidTrida = UUID.randomUUID.toString
             Dress.up(client).hset(s"trida:$nazevTridy", "uuid", uuidTrida)
             Dress.up(client).hset(s"trida:$uuidTrida", "nazev", nazevTridy)
-            Redirect(routes.Application.index())
+            Redirect(routes.DochazkaController.summary())
           }
         }
       })

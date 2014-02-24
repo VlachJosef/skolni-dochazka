@@ -22,19 +22,31 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.i18n.Messages
+import play.api.data.FormError
 
 object ZakController extends Controller with DochazkaSecured {
 
   val zakMapping = mapping(
     "uuidZak" -> optional(UUIDMapping.uuidType),
-    "jmeno" -> nonEmptyText,
-    "prijmeni" -> nonEmptyText,
+    "jmeno" -> optional(nonEmptyText),
+    "prijmeni" -> optional(nonEmptyText),
+    "poradoveCislo" -> number,
     "uuidTrida" -> UUIDMapping.uuidType)(Zak.apply)(Zak.unapply)
 
   val zakForm = Form(zakMapping)
 
   def create = DochazkaSecuredAction { implicit request =>
     Ok(views.html.zak.create(zakForm, routes.ZakController.save, Application.getSelectableTridy()))
+  }
+
+  def add(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
+    val pool = use[RedisPlugin].sedisPool
+    pool.withJedisClient { client =>
+      val trida = Trida.getByUUID(uuidTrida, client)
+      val maxPoradoveCislo = Trida.getMaxPoradoveCisloZak(uuidTrida, client)
+      val zak = Zak(None, None, None, maxPoradoveCislo, UUID.fromString(uuidTrida))
+      Ok(views.html.zak.create(zakForm.fill(zak), routes.ZakController.save, Application.getSelectableTridy()))
+    }
   }
 
   def save = DochazkaSecuredAction { implicit request =>
@@ -44,26 +56,35 @@ object ZakController extends Controller with DochazkaSecured {
         Ok(views.html.zak.create(formWithErrors, routes.ZakController.save, Application.getSelectableTridy()))
       },
       zak => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          val uuidZak = UUID.randomUUID.toString
-
-          val sedis = Dress.up(client)
-
-          sedis.sadd("zaci", uuidZak)
-
-          sedis.hset(s"zak:$uuidZak", "jmeno", zak.jmeno)
-          sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni)
-          sedis.hset(s"zak:$uuidZak", "uuidTridy", zak.uuidTrida.toString)
-
-          sedis.sadd(zak.uuidTrida.toString, uuidZak) // pridame do tridy uuidTrida zaka s uuidZak
-
-          Redirect(routes.Application.index())
-        }
+        validateZakForm(form, zak).fold(
+          formWithErrors => Ok(views.html.zak.create(formWithErrors, routes.ZakController.save, Application.getSelectableTridy())),
+          okForm => {
+            val pool = use[RedisPlugin].sedisPool
+            pool.withJedisClient { client =>
+              Zak.save(zak, client)
+              Redirect(routes.DochazkaController.summary())
+            }
+          })
       })
   }
 
-  def edit = DochazkaSecuredAction {  implicit request =>
+  private def validateZakForm(form: Form[Zak], bindedZak: Zak): Either[Form[Zak], String] = {
+    val finalErrors =
+      Seq(validateRequired(bindedZak.jmeno.isEmpty, "jmeno"),
+        validateRequired(bindedZak.prijmeni.isEmpty, "prijmeni"))
+    val errors = finalErrors.collect { case Some(x) => x }
+    val newForm = form.copy(errors = errors)
+
+    newForm.fold(
+      error => Left(newForm),
+      msg => Right("OK"))
+  }
+
+  private def validateRequired(b: Boolean, key: String): Option[FormError] = {
+    if (b) Some(new FormError(key, "error.required")) else None
+  }
+
+  def edit = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val skola = Skola.getSkola(client)
@@ -88,26 +109,9 @@ object ZakController extends Controller with DochazkaSecured {
       zak => {
         val pool = use[RedisPlugin].sedisPool
         pool.withJedisClient { client =>
-          val uuidZak = zak.uuidZak.get.toString
-
-          val sedis = Dress.up(client)
-
-          if (sedis.sismember("zaci", zak.uuidZak.get.toString)) {
-            sedis.hset(s"zak:$uuidZak", "jmeno", zak.jmeno)
-            sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni)
-
-            println("$uuidZak " + uuidZak)
-
-            val oldUUIDTridy = sedis.hget(s"zak:$uuidZak", "uuidTridy")
-            val uuidTrida = zak.uuidTrida.toString
-            if (oldUUIDTridy != uuidTrida) {
-              sedis.hset(s"zak:$uuidZak", "uuidTridy", uuidTrida)
-              sedis.srem(oldUUIDTridy, uuidZak) // presuneme zaka z puvodni tridy...
-              sedis.sadd(uuidTrida, uuidZak) // ... do nove tridy
-            }
-          }
-          Redirect(routes.ZakController.edit())
+          Zak.update(zak, client)
         }
+        Redirect(routes.ZakController.edit())
       })
   }
 

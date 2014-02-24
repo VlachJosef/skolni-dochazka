@@ -4,7 +4,7 @@ import java.util.UUID
 import redis.clients.jedis.Jedis
 import org.sedis.Dress
 
-case class Zak(uuidZak: Option[UUID], jmeno: String, prijmeni: String, uuidTrida: UUID)
+case class Zak(uuidZak: Option[UUID], jmeno: Option[String], prijmeni: Option[String], poradoveCislo: Int, uuidTrida: UUID)
 
 object Zak {
 
@@ -13,19 +13,55 @@ object Zak {
     sedis.sismember("zaci", uuidZak)
   }
 
-  def getByUUIDTrida(uuidTrida: String, client: Jedis): List[Zak] =  {
+  def save(zak: Zak, client: Jedis) = {
+    val uuidZak = UUID.randomUUID.toString
+    val sedis = Dress.up(client)
+
+    sedis.sadd("zaci", uuidZak)
+
+    sedis.hset(s"zak:$uuidZak", "jmeno", zak.jmeno.get)
+    sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni.get)
+    sedis.hset(s"zak:$uuidZak", "uuidTridy", zak.uuidTrida.toString)
+    sedis.hset(s"zak:$uuidZak", "poradoveCislo", zak.poradoveCislo.toString)
+
+    sedis.sadd(zak.uuidTrida.toString, uuidZak) // pridame do tridy uuidTrida zaka s uuidZak
+
+  }
+
+  def update(zak: Zak, client: Jedis) = {
+    val uuidZak = zak.uuidZak.get.toString
+
+    val sedis = Dress.up(client)
+
+    if (sedis.sismember("zaci", zak.uuidZak.get.toString)) {
+      sedis.hset(s"zak:$uuidZak", "jmeno", zak.jmeno.get)
+      sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni.get)
+      sedis.hset(s"zak:$uuidZak", "poradoveCislo", zak.poradoveCislo.toString)
+
+      val oldUUIDTridy = sedis.hget(s"zak:$uuidZak", "uuidTridy")
+      val uuidTrida = zak.uuidTrida.toString
+      if (oldUUIDTridy != uuidTrida) {
+        sedis.hset(s"zak:$uuidZak", "uuidTridy", uuidTrida)
+        sedis.srem(oldUUIDTridy, uuidZak) // presuneme zaka z puvodni tridy...
+        sedis.sadd(uuidTrida, uuidZak) // ... do nove tridy
+      }
+    }
+  }
+
+  def getByUUIDTrida(uuidTrida: String, client: Jedis): List[Zak] = {
     val sedis = Dress.up(client)
     val uuidZaku = sedis.smembers(uuidTrida)
     val zaci = uuidZaku.map(uuidZak => getByUUIDZak(uuidZak, client))
-    zaci.toList.sortBy(zak => zak.prijmeni)
+    zaci.toList.sortBy(zak => zak.poradoveCislo)
   }
 
   def getByUUIDZak(uuidZak: String, client: Jedis): Zak = {
     val sedis = Dress.up(client)
     val jmeno = sedis.hget(s"zak:$uuidZak", "jmeno")
     val prijmeni = sedis.hget(s"zak:$uuidZak", "prijmeni")
+    val poradoveCislo = sedis.hget(s"zak:$uuidZak", "poradoveCislo")
     val uuidTridy = UUID.fromString(sedis.hget(s"zak:$uuidZak", "uuidTridy"))
-    Zak(Some(UUID.fromString(uuidZak)), jmeno, prijmeni, uuidTridy)
+    Zak(Some(UUID.fromString(uuidZak)), Some(jmeno), Some(prijmeni), poradoveCislo.toInt, uuidTridy)
   }
 
   def deleteByUUIDZak(uuidZak: String, client: Jedis): Zak = {

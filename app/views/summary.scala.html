@@ -19,12 +19,13 @@
 				<div class="btn-group btn-group-justified">
 			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.evidujDochazkuByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-calendar"></span> @Messages("pridat.den")</a>
 			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-time"></span> Docházka</a>
+			      <a class="btn btn-default" role="button" href="@routes.ZakController.add(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-user"></span> @Messages("pridat.zaka")</a>
 			    </div>
 			    <hr/>
 	         	<p>@Messages("title.zaci") </p>
-	          	<ul>
+	          	<ul class="hide-bullet">
 	 				@for(zak <- slozeniTrid.zaci) {
-						<li>@zak.jmeno @zak.prijmeni</li>
+						<li>@zak.poradoveCislo. @zak.jmeno @zak.prijmeni</li>
 					}
 				</ul>
 			</div>

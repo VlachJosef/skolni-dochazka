@@ -1,4 +1,4 @@
-@(field: Field, colWidth: model.views.ColumnWidth, placeholder: String = "", label: String = "")
+@(field: Field, colWidth: model.views.ColumnWidth, placeholder: String = "", label: String = "", css: String = "")
 
 @import model.views.helper._
 
@@ -6,7 +6,7 @@
 	<label for="@field.id" class="col-xs-@(colWidth.labelWidth) control-label">@LabelHelper(field.name, label)</label>
 	<div class="col-xs-@(colWidth.inputWidth)">
 		<input type="text" 
-			class="form-control input-sm" 
+			class="form-control input-sm @css" 
 			id="@field.id" 
 			name="@field.name" 
 			value="@field.value.getOrElse("")"

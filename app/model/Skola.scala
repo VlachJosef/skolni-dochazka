@@ -17,7 +17,7 @@ object Skola {
       val zaci = zaciUuid.map(uuidZak => {
         Zak.getByUUIDZak(uuidZak, client)
       })
-      val zaciSorted = zaci.toList.sortBy(zak => zak.prijmeni)
+      val zaciSorted = zaci.toList.sortBy(zak => zak.poradoveCislo)
       SlozeniTridy(trida, zaciSorted)
     })
     Skola(SlozeniTrid)

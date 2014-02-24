@@ -46,7 +46,7 @@
 			@for((zak, index) <- slozeniTridy.zaci.zipWithIndex) {
 				<td>
 					@views.html.simple.hidden(form("dochazka[" + index + "].uuidZak"), zak.uuidZak.get.toString)
-					@views.html.simple.text(form("dochazka[" + index + "].pocetHodin"), showLabel = false, css="pocetHodin mask-pint", maxlength=1)
+					@views.html.simple.text(form("dochazka[" + index + "].pocetHodin"), showLabel = false, css="pocetHodin mask-pint", maxlength=1, defaultValue="4")
 			    </td>
 			}
 			</tr>

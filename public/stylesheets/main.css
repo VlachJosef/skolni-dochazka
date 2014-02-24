@@ -19,3 +19,7 @@ body {
 .error {
 	border: 1px solid red;
 }
+
+ul.hide-bullet li {
+	list-style-type: none;
+}

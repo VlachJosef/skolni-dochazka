@@ -22,6 +22,7 @@ PUT		/trida						controllers.TridaController.update
 DELETE	/trida						controllers.TridaController.delete
 
 GET		/zak/novy				 	controllers.ZakController.create
+GET		/zak/add/:uuidTrida		 	controllers.ZakController.add(uuidTrida)
 GET		/zak/uprav				 	controllers.ZakController.edit
 POST	/zak				 		controllers.ZakController.save
 GET		/zak/:uuidZak	 			controllers.ZakController.editZak(uuidZak)

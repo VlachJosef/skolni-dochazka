@@ -9,7 +9,32 @@
 	<hr/>
 
 	@for(d <- chartData) {
+	<div class="row">
+		<h3 class="text-center">@d.zak.poradoveCislo. @d.zak.jmeno @d.zak.prijmeni</h3>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			<div id="gauge-@d.zak.uuidZak" ></div>
+		</div>
+		<div class="col-xs-4">
+			<table style="position:absolute; top: 80px;">
+				<tbody>
+					<tr>
+						<th>Absence:</th>
+						<td>@d.absence %</td>
+					</tr>
+					<tr>
+						<th>Počet zameškaných hodin:</th>
+						<td>@d.zameskaneHodiny</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<br/>
+	<div class="row">
 		<div id="container-@d.zak.uuidZak" style="height: 200px; margin: auto; min-width: 310px;"></div>
+	</div>
 		<script type="text/javascript">
 	$(function() {
 		Highcharts.theme = {
@@ -24,6 +49,82 @@
 			}
 		}
 		Highcharts.setOptions(Highcharts.theme);
+		$('#gauge-@d.zak.uuidZak').highcharts({
+		exporting: {
+            enabled: false
+        },
+	    chart: {
+	        type: 'gauge',
+	        plotBorderWidth: 1,
+	        plotBackgroundColor: {
+	        	linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+	        	stops: [
+	        		[0, '#FFF4C6'],
+	        		[0.35, '#FFFFFF'],
+	        		[1, '#FFF4C6']
+	        	]
+	        },
+	        plotBackgroundImage: null,
+	        height: 200
+	    },
+	
+	    title: {
+	        text: ''
+	    },
+	    
+	    pane: [{
+	        startAngle: -45,
+	        endAngle: 45,
+	        background: null,
+	        center: ['50%', '125%'],
+	        size: 300
+	    }],	    		        
+	
+	    yAxis: [{
+	        min: 0,
+	        max: 100,
+	        minorTickPosition: 'outside',
+	        tickPosition: 'outside',
+	        labels: {
+	        	rotation: 'auto',
+	        	distance: 20
+	        },
+	        plotBands: [{
+	        	from: 20,
+	        	to: 100,
+	        	color: '#CC0000',
+	        	innerRadius: '95%',
+	        	outerRadius: '100%'
+	        },{
+	        	from: 0,
+	        	to: 20,
+	        	color: '#00CC00',
+	        	innerRadius: '95%',
+	        	outerRadius: '100%'
+	        }],
+	        pane: 0,
+	        title: {
+	        	text: 'Absence %',
+	        	y: -40
+	        }
+	    }],
+	    
+	    plotOptions: {
+	    	gauge: {
+	    		dataLabels: {
+	    			enabled: false
+	    		},
+	    		dial: {
+	    			radius: '100%'
+	    		}
+	    	}
+	    },
+	    	
+	    series: [{
+	        data: [@d.absence],
+	        yAxis: 0
+	    }]
+	});
 		$('#container-@d.zak.uuidZak').highcharts({
 			exporting: {
 	            enabled: false
@@ -35,9 +136,12 @@
 				zoomType: 'xy'
 			},
 			title: {
-				text: '@d.zak.jmeno @d.zak.prijmeni'
+				text: ''
 			},
 			xAxis: [{
+			labels: {
+					enabled: false
+				},
 				categories: [@Html(d.dnyData)]
 			}],
 			yAxis: [{ // Primary yAxis
@@ -76,6 +180,14 @@
 			tooltip: {
 				shared: true
 			},
+			
+			plotOptions: {
+		    	series: {
+	                animation: {
+	                    duration: 3000
+	                }
+	            }
+		    },
 
 			series: [{
 				name: 'Docházka',
@@ -87,7 +199,7 @@
 					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
 				}
 			}, {
-				name: 'Absence',
+				name: 'Celková absence od začátku roku',
 				color: '#89A54E',
 				type: 'spline',
 				data: [@d.kumulativniAbsenceData],

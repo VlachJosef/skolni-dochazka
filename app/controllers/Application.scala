@@ -16,6 +16,7 @@ import play.api.mvc.Request
 import play.api.mvc.AnyContent
 import play.api.mvc.SimpleResult
 import play.api.mvc.Results
+import model.Sinner
 
 object Application extends Controller {
 
@@ -37,13 +38,20 @@ object Application extends Controller {
 
 trait DochazkaSecured extends securesocial.core.SecureSocial {
   def DochazkaSecuredAction(f: => Request[AnyContent] => SimpleResult) =
-//    Action {implicit request => f(request)} // pro vypnutí security
+    // Action {implicit request => f(request)} // pro vypnutí security
     SecuredAction { implicit request =>
       val userName = request.user
       userName.email match {
         case Some("vlach.josef@gmail.com") => f(request)
         case Some("katkahlavacova@centrum.cz") => f(request)
-        case Some(email) => Results.Forbidden("Na to ani nemysli milánku. " + email)
+        case Some(email) => {
+          val pool = use[RedisPlugin].sedisPool
+          pool.withJedisClient { client =>
+            Sinner.saveSinner(email, client)
+            val sinners = Sinner.allSinners(client)
+            Results.Forbidden(views.html.sinners(sinners))
+          }
+        }
         case _ => Results.Forbidden
       }
     }

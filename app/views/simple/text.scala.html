@@ -1,4 +1,4 @@
-@(field: Field, placeholder: String = "", showLabel: Boolean = true, css: String = "", maxlength:Int=0)
+@(field: Field, placeholder: String = "", showLabel: Boolean = true, css: String = "", maxlength:Int=0, defaultValue: String = "")
 
 @import model.views.helper._
 @if(showLabel) {
@@ -8,7 +8,7 @@
 	class="@css"
 	id="@field.id" 
 	name="@field.name" 
-	value="@field.value.getOrElse("")"
+	value="@field.value.getOrElse(defaultValue)"
 	placeholder="@placeholder"
 	@if(maxlength > 0) {
 		maxlength="@maxlength"

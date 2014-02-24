@@ -6,9 +6,9 @@
       <a href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)" class="list-group-item">
         <h4 class="list-group-item-heading">Třída  @slozeniTrid.trida.nazev</h4>
         <hr/>
-        <ul>
+        <ul class="hide-bullet">
 	 	@for(zak <- slozeniTrid.zaci) {
-			<li>@zak.jmeno @zak.prijmeni</li>
+			<li>@zak.poradoveCislo. @zak.jmeno @zak.prijmeni</li>
 		}
 		</ul>
       </a>
