@@ -1,0 +1,209 @@
+@(trida: model.Trida, chartData: List[model.Chart])
+
+@import model.views._
+@import model.views.helper._
+
+@for(d <- chartData) {	
+	<div class="row">
+		<h3 class="text-center">@d.zak.poradoveCislo. @d.zak.jmeno @d.zak.prijmeni</h3>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			<div id="gauge-@d.zak.uuidZak" ></div>
+		</div>
+		<div class="col-xs-4">
+			<table style="position:absolute; top: 80px;">
+				<tbody>
+					<tr>
+						<th>Absence:</th>
+						<td>@d.absence %</td>
+					</tr>
+					<tr>
+						<th>Počet zameškaných hodin:</th>
+						<td>@d.zameskaneHodiny</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<br/>
+	<div class="row">
+		<div id="container-@d.zak.uuidZak" style="height: 200px; margin: auto; min-width: 310px;"></div>
+	</div>
+		<script type="text/javascript">
+	$(function() {
+		Highcharts.theme = {
+		  chart: {
+		      backgroundColor: {
+		         linearGradient: [0, 0, 300, 300],
+		         stops: [
+		            [0, 'rgb(255, 255, 255)'],
+		            [1, 'rgb(240, 240, 240)']
+		         ]
+		      }
+			}
+		}
+		Highcharts.setOptions(Highcharts.theme);
+		$('#gauge-@d.zak.uuidZak').highcharts({
+		exporting: {
+            enabled: false
+        },
+	    chart: {
+	        type: 'gauge',
+	        plotBorderWidth: 1,
+	        plotBackgroundColor: {
+	        	linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+	        	stops: [
+	        		[0, '#FFF4C6'],
+	        		[0.35, '#FFFFFF'],
+	        		[1, '#FFF4C6']
+	        	]
+	        },
+	        plotBackgroundImage: null,
+	        height: 200
+	    },
+	
+	    title: {
+	        text: ''
+	    },
+	    
+	    pane: [{
+	        startAngle: -45,
+	        endAngle: 45,
+	        background: null,
+	        center: ['50%', '125%'],
+	        size: 300
+	    }],	    		        
+	
+	    yAxis: [{
+	        min: 0,
+	        max: 100,
+	        minorTickPosition: 'outside',
+	        tickPosition: 'outside',
+	        labels: {
+	        	rotation: 'auto',
+	        	distance: 20
+	        },
+	        plotBands: [{
+	        	from: 20,
+	        	to: 100,
+	        	color: '#CC0000',
+	        	innerRadius: '95%',
+	        	outerRadius: '100%'
+	        },{
+	        	from: 0,
+	        	to: 20,
+	        	color: '#00CC00',
+	        	innerRadius: '95%',
+	        	outerRadius: '100%'
+	        }],
+	        pane: 0,
+	        title: {
+	        	text: 'Absence %',
+	        	y: -40
+	        }
+	    }],
+	    
+	    plotOptions: {
+	    	gauge: {
+	    		dataLabels: {
+	    			enabled: false
+	    		},
+	    		dial: {
+	    			radius: '100%'
+	    		}
+	    	}
+	    },
+	    	
+	    series: [{
+	        data: [@d.absence],
+	        yAxis: 0
+	    }]
+	});
+		$('#container-@d.zak.uuidZak').highcharts({
+			exporting: {
+	            enabled: false
+	        },
+			legend: {
+				enabled : false
+			},
+			chart: {
+				zoomType: 'xy'
+			},
+			title: {
+				text: ''
+			},
+			xAxis: [{
+			labels: {
+					enabled: false
+				},
+				categories: [@Html(d.dnyData)]
+			}],
+			yAxis: [{ // Primary yAxis
+				labels: {
+					formatter: function() {
+						return this.value;
+					},
+					style: {
+						color: '#89A54E'
+					}
+				},
+				title: {
+					text: 'Absence',
+					style: {
+						color: '#89A54E'
+					}
+				}
+			}, { // Secondary yAxis
+				title: {
+					text: 'hodina/den',
+					style: {
+						color: '#4572A7'
+					}
+				},
+				labels: {
+					formatter: function() {
+						return this.value;
+					},
+					style: {
+						color: '#4572A7'
+					}
+				},
+				opposite: true
+			}],
+
+			tooltip: {
+				shared: true
+			},
+			
+			plotOptions: {
+		    	series: {
+	                animation: {
+	                    duration: 3000
+	                }
+	            }
+		    },
+
+			series: [{
+				name: 'Docházka',
+				color: '#4572A7',
+				type: 'column',
+				yAxis: 1,
+				data: [@d.dochazkaData],
+				tooltip: {
+					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
+				}
+			}, {
+				name: 'Celková absence od začátku roku',
+				color: '#89A54E',
+				type: 'spline',
+				data: [@d.kumulativniAbsenceData],
+				tooltip: {
+					pointFormat: '<br/><span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
+				}
+			}]
+		});
+	});
+	</script>
+	<br/>
+}

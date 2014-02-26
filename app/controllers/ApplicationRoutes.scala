@@ -25,7 +25,8 @@ object ApplicationRoutes extends Controller  {
       controllers.routes.javascript.BackupController.restore,
       controllers.routes.javascript.DochazkaController.put,
       controllers.routes.javascript.DochazkaController.update,
-      controllers.routes.javascript.DochazkaController.delete
+      controllers.routes.javascript.DochazkaController.delete,
+      controllers.routes.javascript.DochazkaController.prehledByUUIDTridaOrdered
       )
     Ok(routes).as("text/javascript")
   }

@@ -11,7 +11,6 @@ case class Pritomnost(uuidZak: String, pocetHodin: Int)
 case class Dochazka(den: LocalDate, uuidTrida: String, hodiny: List[Pritomnost])
 case class DochazkaUpdate(den: LocalDate, uuidZak: String, pocetHodin: Int)
 
-case class Chart(zak: Zak, dnyData: String, dochazkaData: String, kumulativniAbsenceData: String, absence: Double, zameskaneHodiny: Int)
 case class DochazkaZaka(zak: Zak, pocetHodin: Int)
 case class DochazkaTableHeader(zaci: List[Zak])
 case class DochazkaTableBody(den: String, zaci: List[DochazkaZaka])
