@@ -82,31 +82,12 @@ object DochazkaController extends Controller with DochazkaSecured {
     }
   }
 
-  def evidujDochazkuByUUIDTrida(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
+  def editDochazkaByUUIDTrida(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val slozeniTridy = Skola.getSlozeniTridy(uuidTrida, client)
       Ok(views.html.dochazka.create(dochazkaForDayForm, slozeniTridy, Dochazka.getDochazkaTable(uuidTrida, client)))
     }
-  }
-
-  def save(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
-    val form = dochazkaForDayForm.bindFromRequest
-    form.fold(
-      formWithErrors => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          val slozeniTridy = Skola.getSlozeniTridy(uuidTrida, client)
-          Ok(views.html.dochazka.create(formWithErrors, Skola.getSlozeniTridy(uuidTrida, client), Dochazka.getDochazkaTable(uuidTrida, client)))
-        }
-      },
-      dochazka => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          Dochazka.saveDochazka(dochazka, client)
-          Redirect(routes.DochazkaController.prehledByUUIDTrida(uuidTrida))
-        }
-      })
   }
 
   val localDateRead = jodaLocalDateReads("dd.MM.yyyy")

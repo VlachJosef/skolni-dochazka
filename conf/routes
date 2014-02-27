@@ -32,8 +32,7 @@ DELETE	/zak						controllers.ZakController.delete
 GET     /dochazka/summary			controllers.DochazkaController.summary
 GET		/dochazka/:uuidTrida/:orderBy/:direction	controllers.DochazkaController.prehledByUUIDTridaOrdered(uuidTrida, orderBy, direction)
 GET		/dochazka/:uuidTrida		controllers.DochazkaController.prehledByUUIDTrida(uuidTrida)
-GET		/dochazka/create/:uuidTrida	controllers.DochazkaController.evidujDochazkuByUUIDTrida(uuidTrida)
-POST	/dochazka/:uuidTrida		controllers.DochazkaController.save(uuidTrida)
+GET		/dochazka/edit/:uuidTrida	controllers.DochazkaController.editDochazkaByUUIDTrida(uuidTrida)
 PUT		/dochazka					controllers.DochazkaController.put
 PUT		/dochazka/update			controllers.DochazkaController.update
 DELETE	/dochazka					controllers.DochazkaController.delete

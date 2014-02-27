@@ -17,7 +17,7 @@
 			</div>
 			<div class="panel-body">
 				<div class="btn-group btn-group-justified">
-			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.evidujDochazkuByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-calendar"></span> @Messages("pridat.den")</a>
+			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.editDochazkaByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-calendar"></span> @Messages("pridat.den")</a>
 			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-time"></span> Docházka</a>
 			      <a class="btn btn-default" role="button" href="@routes.ZakController.add(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-user"></span> @Messages("pridat.zaka")</a>
 			    </div>
