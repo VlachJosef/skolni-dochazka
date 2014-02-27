@@ -1,4 +1,4 @@
-name := "dochazka"
+name := "skolni"
 
 version := "1.0-SNAPSHOT"
 
