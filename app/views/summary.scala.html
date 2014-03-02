@@ -2,8 +2,9 @@
 
 @main("Docházka - administrace") {
 <p>
-	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.trida.nova")</a>
-	<a class="btn btn-danger btn-lg active" role="button" href="@routes.BackupController.backup"><span class="glyphicon glyphicon-transfer"></span> @Messages("legend.backup")</a>
+	<a class="btn btn-primary btn active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.trida.nova")</a>
+	<a class="btn btn-primary btn active" role="button" href="@routes.DochazkaController.sinners"><span class="glyphicon glyphicon-fire"></span> @Messages("legend.sinners")</a>
+	<a class="btn btn-danger btn active" role="button" href="@routes.BackupController.backup"><span class="glyphicon glyphicon-transfer"></span> @Messages("legend.backup")</a>
 </p>
 
 @if(!flash.get("okMsg").isEmpty) {

@@ -3,10 +3,6 @@
 @main("Neoprávněný přístup zablokován") {
 <div class="row">
 	<div class="alert alert-danger">Pokus o neoprávněný přístup byl zablokován, vaše údaje budou nahlášeny na cizineckou policii a budete deportován, společně s těmito hříšníky</div>
-	<ol>
-  	@for(sinner <- sinners) {
-		<li>@sinner</li>
-	}
-	</ol>
+	@views.html.sinnersList(sinners)
 </div>
 }

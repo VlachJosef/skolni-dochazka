@@ -28,6 +28,7 @@ import model.Pritomnost
 import play.api.i18n.Messages
 import model.DochazkaUpdate
 import com.github.nscala_time.time.Implicits._
+import model.Sinner
 
 object DochazkaController extends Controller with DochazkaSecured {
 
@@ -161,6 +162,14 @@ object DochazkaController extends Controller with DochazkaSecured {
         // TODO logovani chyby pri
         BadRequest(Json.obj("message" -> Messages("error.delete.dochazka.day")))
       }
+    }
+  }
+
+  def sinners = DochazkaSecuredAction { implicit request =>
+    val pool = use[RedisPlugin].sedisPool
+    pool.withJedisClient { client =>
+      val sinners = Sinner.allSinners(client)
+      Ok(views.html.dochazka.sinners(sinners))
     }
   }
 }

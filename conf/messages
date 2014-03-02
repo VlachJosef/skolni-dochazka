@@ -17,7 +17,7 @@ administration=Upravit docházku
 
 legend.trida.nova=Nová třída
 legend.trida.edit=Uprav třídu
-legend.trida.update=Třída
+legend.trida.update=Úprava třídy
 nazevTrida=Název třídy
 prerusit=Přerušit
 trida.save=Založit třídu
@@ -28,6 +28,7 @@ legend.zak.novy=Nový žák
 legend.zak.edit=Uprav žáka
 legend.backup=Zálohy
 legend.backup.new=Nová záloha
+legend.sinners=Hríšníci
 jmeno=Jméno
 prijmeni=Příjmení
 poradoveCislo=Pořadové číslo

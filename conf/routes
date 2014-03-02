@@ -32,6 +32,7 @@ GET		/dochazka/edit/:uuidTrida	controllers.DochazkaController.editDochazkaByUUID
 PUT		/dochazka					controllers.DochazkaController.put
 PUT		/dochazka/update			controllers.DochazkaController.update
 DELETE	/dochazka					controllers.DochazkaController.delete
+GET		/sinners					controllers.DochazkaController.sinners
 
 GET		/backup						controllers.BackupController.backup
 GET		/backup/dump				controllers.BackupController.dump
