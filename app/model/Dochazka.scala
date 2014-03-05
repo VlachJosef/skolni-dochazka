@@ -6,6 +6,7 @@ import org.sedis.Dress
 import org.joda.time.format.DateTimeFormat
 import com.github.nscala_time.time.Implicits._
 import org.joda.time.LocalDate
+import controllers.DochazkaController
 
 case class Pritomnost(uuidZak: String, pocetHodin: Int)
 case class Dochazka(den: LocalDate, uuidTrida: String, hodiny: List[Pritomnost])
@@ -18,12 +19,18 @@ case class DochazkaTable(header: DochazkaTableHeader, dnyData: List[DochazkaTabl
 
 object Dochazka {
 
+   def aktivityFilter(typVyuky: String): Zak => Boolean = { zak => typVyuky match {
+        case "aktivity" => zak.aktivity
+        case _ => true
+      }
+  }
+
   val formatter = DateTimeFormat.forPattern("dd.MM.yyyy")
 
   def getDochazkaTable(uuidTrida: String, typVyuky: String, client: Jedis) = {
     val sedis = Dress.up(client)
     val dnyDochazky = this.getDnyDochazkyByUUidTrida(uuidTrida, typVyuky, client)
-    val zaci = Zak.getByUUIDTrida(uuidTrida, client);
+    val zaci = Zak.getByUUIDTrida(uuidTrida, client).filter(aktivityFilter(typVyuky));
     val dnyLocalDate = dnyDochazky.map(formatter.parseLocalDate(_)).toList.sorted
     val tableBody = for (
       den <- dnyLocalDate

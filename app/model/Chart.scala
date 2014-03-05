@@ -82,7 +82,11 @@ object Chart {
 
     val chartsData = zaci.map(zak => {
       val denPocetHodinVyuka = getPocetHodinZaDen(zak, dnyVyuky, "vyuka")
-      val denPocetHodinAktivity = getPocetHodinZaDen(zak, dnyAktivity, "aktivity")
+      val denPocetHodinAktivity = if (zak.aktivity) {
+        getPocetHodinZaDen(zak, dnyAktivity, "aktivity")
+      } else {
+        List[Tuple2[String, Int]]()
+      }
 
       val dochazkaDenList = convertDenPocetHodinToDenniDochazka(denPocetHodinVyuka, denPocetHodinAktivity);
 

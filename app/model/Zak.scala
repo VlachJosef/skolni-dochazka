@@ -4,7 +4,7 @@ import java.util.UUID
 import redis.clients.jedis.Jedis
 import org.sedis.Dress
 
-case class Zak(uuidZak: Option[UUID], jmeno: String, prijmeni: String, poradoveCislo: Int, uuidTrida: UUID)
+case class Zak(uuidZak: Option[UUID], jmeno: String, prijmeni: String, poradoveCislo: Int, aktivity: Boolean, uuidTrida: UUID)
 
 object Zak {
 
@@ -23,6 +23,7 @@ object Zak {
     sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni)
     sedis.hset(s"zak:$uuidZak", "uuidTridy", zak.uuidTrida.toString)
     sedis.hset(s"zak:$uuidZak", "poradoveCislo", zak.poradoveCislo.toString)
+    sedis.hset(s"zak:$uuidZak", "aktivity", zak.aktivity.toString)
 
     sedis.sadd(zak.uuidTrida.toString, uuidZak) // pridame do tridy uuidTrida zaka s uuidZak
 
@@ -37,6 +38,7 @@ object Zak {
       sedis.hset(s"zak:$uuidZak", "jmeno", zak.jmeno)
       sedis.hset(s"zak:$uuidZak", "prijmeni", zak.prijmeni)
       sedis.hset(s"zak:$uuidZak", "poradoveCislo", zak.poradoveCislo.toString)
+      sedis.hset(s"zak:$uuidZak", "aktivity", zak.aktivity.toString)
 
       val oldUUIDTridy = sedis.hget(s"zak:$uuidZak", "uuidTridy")
       val uuidTrida = zak.uuidTrida.toString
@@ -60,8 +62,9 @@ object Zak {
     val jmeno = sedis.hget(s"zak:$uuidZak", "jmeno")
     val prijmeni = sedis.hget(s"zak:$uuidZak", "prijmeni")
     val poradoveCislo = sedis.hget(s"zak:$uuidZak", "poradoveCislo")
+    val aktivity = sedis.hget(s"zak:$uuidZak", "aktivity")
     val uuidTridy = UUID.fromString(sedis.hget(s"zak:$uuidZak", "uuidTridy"))
-    Zak(Some(UUID.fromString(uuidZak)), jmeno, prijmeni, poradoveCislo.toInt, uuidTridy)
+    Zak(Some(UUID.fromString(uuidZak)), jmeno, prijmeni, poradoveCislo.toInt, aktivity.toBoolean, uuidTridy)
   }
 
   def deleteByUUIDZak(uuidZak: String, client: Jedis): Zak = {

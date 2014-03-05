@@ -31,6 +31,7 @@ object ZakController extends Controller with DochazkaSecured {
     "jmeno" -> nonEmptyText,
     "prijmeni" -> nonEmptyText,
     "poradoveCislo" -> number,
+    "aktivity" -> boolean,
     "uuidTrida" -> UUIDMapping.uuidType)(Zak.apply)(Zak.unapply)
 
   val zakForm = Form(zakMapping)
@@ -40,7 +41,7 @@ object ZakController extends Controller with DochazkaSecured {
     pool.withJedisClient { client =>
       val trida = Trida.getByUUID(uuidTrida, client)
       val maxPoradoveCislo = Trida.getMaxPoradoveCisloZak(uuidTrida, client)
-      val zak = Zak(None, "", "", maxPoradoveCislo, UUID.fromString(uuidTrida))
+      val zak = Zak(None, "", "", maxPoradoveCislo, true, UUID.fromString(uuidTrida))
       Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.novy"))
     }
   }

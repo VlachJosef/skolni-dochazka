@@ -87,7 +87,10 @@ object DochazkaController extends Controller with DochazkaSecured {
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val slozeniTridy = Skola.getSlozeniTridy(uuidTrida, client)
-      Ok(views.html.dochazka.create(dochazkaForDayForm, slozeniTridy, Dochazka.getDochazkaTable(uuidTrida, typVyuky, client), typVyuky))
+      val slozeniTridyFilter = slozeniTridy.copy(zaci = slozeniTridy.zaci.filter(Dochazka.aktivityFilter(typVyuky)))
+      val dochazkaTable = Dochazka.getDochazkaTable(uuidTrida, typVyuky, client)
+      val dochazkaTableFilter = dochazkaTable.copy(header = dochazkaTable.header.copy(zaci = dochazkaTable.header.zaci.filter(Dochazka.aktivityFilter(typVyuky))))
+      Ok(views.html.dochazka.create(dochazkaForDayForm, slozeniTridyFilter, dochazkaTableFilter, typVyuky))
     }
   }
 
