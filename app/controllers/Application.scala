@@ -38,7 +38,7 @@ object Application extends Controller {
 
 trait DochazkaSecured extends securesocial.core.SecureSocial {
   def DochazkaSecuredAction(f: => Request[AnyContent] => SimpleResult) =
-    // Action {implicit request => f(request)} // pro vypnutí security
+    //Action {implicit request => f(request)} // pro vypnutí security
     SecuredAction { implicit request =>
       val userName = request.user
       userName.email match {

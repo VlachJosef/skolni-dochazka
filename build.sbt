@@ -12,6 +12,10 @@ libraryDependencies ++= Seq(
   "ws.securesocial" %% "securesocial" % "2.1.3"
 )   
 
+resolvers := Seq(
+  "Sedis Repo" at "http://pk11-scratch.googlecode.com/svn/trunk"
+)
+
 resolvers += Resolver.sonatypeRepo("releases") 
 
 play.Project.playScalaSettings

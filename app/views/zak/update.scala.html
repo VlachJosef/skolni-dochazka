@@ -1,4 +1,4 @@
-@(zakForm: play.api.data.Form[model.Zak], call: play.api.mvc.Call, tridy: Seq[model.views.Selectable])(implicit flash: Flash)
+@(zakForm: play.api.data.Form[model.Zak], call: play.api.mvc.Call, tridy: Seq[model.views.Selectable], legend: String)(implicit flash: Flash)
 
 @import model.views._
 @import model.views.helper._
@@ -9,7 +9,7 @@
 	
 	<form class="form-horizontal" action="@call" method="post">
 		<fieldset>
-			<legend>@Messages("legend.zak.edit")</legend>
+			<legend>@Messages(legend)</legend>
 			<div class="form-group">
 				@views.html.bootstrap3.hidden(zakForm("uuidZak"))
 				@views.html.bootstrap3.text(zakForm("poradoveCislo"), ColumnWidth(2,5), css="mask-pnum")

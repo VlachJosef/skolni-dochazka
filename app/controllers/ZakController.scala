@@ -28,75 +28,20 @@ object ZakController extends Controller with DochazkaSecured {
 
   val zakMapping = mapping(
     "uuidZak" -> optional(UUIDMapping.uuidType),
-    "jmeno" -> optional(nonEmptyText),
-    "prijmeni" -> optional(nonEmptyText),
+    "jmeno" -> nonEmptyText,
+    "prijmeni" -> nonEmptyText,
     "poradoveCislo" -> number,
     "uuidTrida" -> UUIDMapping.uuidType)(Zak.apply)(Zak.unapply)
 
   val zakForm = Form(zakMapping)
-
-  def create = DochazkaSecuredAction { implicit request =>
-    Ok(views.html.zak.create(zakForm, routes.ZakController.save, Application.getSelectableTridy()))
-  }
 
   def add(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val trida = Trida.getByUUID(uuidTrida, client)
       val maxPoradoveCislo = Trida.getMaxPoradoveCisloZak(uuidTrida, client)
-      val zak = Zak(None, None, None, maxPoradoveCislo, UUID.fromString(uuidTrida))
-      Ok(views.html.zak.create(zakForm.fill(zak), routes.ZakController.save, Application.getSelectableTridy()))
-    }
-  }
-
-  def save = DochazkaSecuredAction { implicit request =>
-    val form = zakForm.bindFromRequest
-    form.fold(
-      formWithErrors => {
-        Ok(views.html.zak.create(formWithErrors, routes.ZakController.save, Application.getSelectableTridy()))
-      },
-      zak => {
-        validateZakForm(form, zak).fold(
-          formWithErrors => Ok(views.html.zak.create(formWithErrors, routes.ZakController.save, Application.getSelectableTridy())),
-          okForm => {
-            val pool = use[RedisPlugin].sedisPool
-            pool.withJedisClient { client =>
-              Zak.save(zak, client)
-              Redirect(routes.DochazkaController.summary())
-            }
-          })
-      })
-  }
-
-  private def validateZakForm(form: Form[Zak], bindedZak: Zak): Either[Form[Zak], String] = {
-    val finalErrors =
-      Seq(validateRequired(bindedZak.jmeno.isEmpty, "jmeno"),
-        validateRequired(bindedZak.prijmeni.isEmpty, "prijmeni"))
-    val errors = finalErrors.collect { case Some(x) => x }
-    val newForm = form.copy(errors = errors)
-
-    newForm.fold(
-      error => Left(newForm),
-      msg => Right("OK"))
-  }
-
-  private def validateRequired(b: Boolean, key: String): Option[FormError] = {
-    if (b) Some(new FormError(key, "error.required")) else None
-  }
-
-  def edit = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val skola = Skola.getSkola(client)
-      Ok(views.html.zak.edit(skola))
-    }
-  }
-
-  def editZak(uuidZak: String) = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val zak = Zak.getByUUIDZak(uuidZak, client)
-      Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy()))
+      val zak = Zak(None, "", "", maxPoradoveCislo, UUID.fromString(uuidTrida))
+      Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.novy"))
     }
   }
 
@@ -104,15 +49,26 @@ object ZakController extends Controller with DochazkaSecured {
     val form = zakForm.bindFromRequest
     form.fold(
       formWithErrors => {
-        Ok(views.html.zak.update(formWithErrors, routes.ZakController.update, Application.getSelectableTridy()))
+        Ok(views.html.zak.update(formWithErrors, routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.edit"))
       },
       zak => {
         val pool = use[RedisPlugin].sedisPool
         pool.withJedisClient { client =>
-          Zak.update(zak, client)
+          zak.uuidZak match {
+            case Some(_) => Zak.update(zak, client)
+            case None => Zak.save(zak, client)
+          }
         }
-        Redirect(routes.ZakController.edit())
+        Redirect(routes.DochazkaController.summary())
       })
+  }
+
+  def editZak(uuidZak: String) = DochazkaSecuredAction { implicit request =>
+    val pool = use[RedisPlugin].sedisPool
+    pool.withJedisClient { client =>
+      val zak = Zak.getByUUIDZak(uuidZak, client)
+      Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.edit"))
+    }
   }
 
   implicit object UUIDFormat extends Format[UUID] {

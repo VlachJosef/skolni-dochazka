@@ -71,55 +71,42 @@ object TridaController extends Controller with DochazkaSecured {
       })
   }
 
-  def edit = DochazkaSecuredAction { implicit request =>
-    Ok(views.html.trida.edit(tridaForm, Application.getSelectableTridy()))
-  }
-
   def editTrida(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val trida = Trida.getByUUID(uuidTrida, client)
-      val zaci = Zak.getByUUIDTrida(uuidTrida, client)
-      Ok(views.html.trida.update(tridaForm.fill(trida), zaci))
+      Ok(views.html.trida.update(tridaForm.fill(trida), routes.TridaController.update(uuidTrida)))
     }
   }
 
-  def update = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
-    request.body.validate[Trida].map {
-      case Trida(Some(uuidTrida), nazev) => {
+  def update(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
+    val form = tridaForm.bindFromRequest
+    form.fold(
+      formWithErrors => {
+        Ok(views.html.trida.update(formWithErrors, routes.TridaController.update(uuidTrida)))
+      },
+      trida => {
         val pool = use[RedisPlugin].sedisPool
         pool.withJedisClient { client =>
           val nazevOld = Dress.up(client).hget(s"trida:$uuidTrida", "nazev")
-          if (nazevOld != null) {
+          val nazev = trida.nazev
+          if (nazev != nazevOld) {
             if (Dress.up(client).sadd("tridy", nazev) == 0) {
-              BadRequest(Json.obj("message" -> Messages("error.already.exists", Messages("nazevTrida"), nazev)))
+              BadRequest("Chyba pri prejmenovani Tridy")
             } else {
               Dress.up(client).srem("tridy", nazevOld)
               client.del(s"trida:$nazevOld")
               Dress.up(client).hset(s"trida:$nazev", "uuid", uuidTrida.toString)
               Dress.up(client).hset(s"trida:$uuidTrida", "nazev", nazev)
-              Ok(Json.obj(
-                "nazevTrida" -> nazev,
-                "uuidTrida" -> uuidTrida,
-                "message" -> Messages("success.zmena.nazev.tridy", nazevOld, nazev)))
+              Redirect(routes.DochazkaController.summary()).flashing("okMsg" -> Messages("success.zmena.nazev.tridy", nazevOld, nazev))
             }
           } else {
-            BadRequest(Json.obj("message" -> Messages("error.trida.nenalezena", uuidTrida)))
+            Redirect(routes.DochazkaController.summary())
           }
         }
-      }
-    }.recoverTotal { e =>
-      {
-        val errors = e.errors.map(fieldError => {
-          val path = fieldError._1
-          fieldError._2.map(valError => {
-            Messages(valError.message, Messages(path.toString.substring(1)), valError.args(0))
-          })
-        }).flatten
-        BadRequest(Json.obj("message" -> errors))
-      }
-    }
+      })
   }
+
   def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[Trida].map {
       case Trida(Some(uuidTrida), nazev) => {

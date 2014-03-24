@@ -3,13 +3,11 @@
 @import model.views.helper._
 
 @if(form.hasErrors) {
-	<div class="well">
-		<div id="success-message" class="text-error">
-			<ul>
-			@form.errors.map { error =>
-				<li>@ErrorHelper(error)</li>
-			}
-			</ul>
-		</div>
+	<div class="alert alert-danger">
+		<ul>
+		@form.errors.map { error =>
+			<li>@ErrorHelper(error)</li>
+		}
+		</ul>
 	</div>
 }

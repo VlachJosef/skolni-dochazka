@@ -1,19 +1,26 @@
-@(skola: model.Skola)
+@(skola: model.Skola)(implicit flash: Flash)
 
-@main("Welcome to Play") {
+@main("Docházka - administrace") {
 <p>
 	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.trida.nova")</a>
-	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.zak.novy")</a>
-	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.edit"><span class="glyphicon glyphicon-edit"></span> @Messages("legend.trida.edit")</a>
-	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.edit"><span class="glyphicon glyphicon-edit"></span> @Messages("legend.zak.edit")</a>
 	<a class="btn btn-danger btn-lg active" role="button" href="@routes.BackupController.backup"><span class="glyphicon glyphicon-transfer"></span> @Messages("legend.backup")</a>
 </p>
+
+@if(!flash.get("okMsg").isEmpty) {
+	<div class="alert alert-success" id="success">
+      @flash.get("okMsg")
+    </div>
+}
+<div class="alert alert-success" id="success" style="display: none;"></div>
+<div class="alert alert-danger" id="danger" style="display: none;"></div>
 <div class="row">
   	@for(slozeniTrid <- skola.slozeniTrid) {
 	<div class="col-sm-4">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazev</h3>
+				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazev
+					<span class="pull-right"><a href="@routes.TridaController.editTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-edit"></span></a>
+				</h3>
 			</div>
 			<div class="panel-body">
 				<div class="btn-group btn-group-justified">
@@ -25,7 +32,13 @@
 	         	<p>@Messages("title.zaci") </p>
 	          	<ul class="hide-bullet">
 	 				@for(zak <- slozeniTrid.zaci) {
-						<li>@zak.poradoveCislo. @zak.jmeno @zak.prijmeni</li>
+						<li id="cont-@zak.uuidZak.get.toString">
+							<a href="@routes.ZakController.editZak(zak.uuidZak.get.toString)">@zak.poradoveCislo. @zak.jmeno @zak.prijmeni</a>
+							<a href="#" id="@zak.uuidZak.get.toString" class="pull-right"><span class="glyphicon glyphicon-trash"></span></a>
+						</li>
+						<script type="text/javascript">
+						$('#@zak.uuidZak.get.toString').click(function() { smazZaka($(this).attr('id')); });
+						</script>
 					}
 				</ul>
 			</div>
@@ -33,4 +46,28 @@
 	</div>
 	}
 </div>
+<script type="text/javascript">
+var smazZaka = function(uuidZak) {
+	bootbox.setDefaults({locale: "cz"})
+	bootbox.confirm("@Messages("question.delete.zak")", function(result) {
+		if(result) {
+			$.when(
+				appRoutes.controllers.ZakController.delete().ajax({
+					data: JSON.stringify({uuidZak: uuidZak}),
+					contentType: 'application/json'
+				})
+			).then(function(resp) {
+				$('#danger').hide();
+				$('#success').show();
+				$('#success').html(resp.message);
+				$('#cont-'+uuidZak).remove();
+			}).fail(function(resp) {
+				$('#success').hide();
+				$('#danger').show();
+				$('#danger').html($.parseJSON(resp.responseText).message);
+			});
+		}
+	}); 
+}
+</script>
 }

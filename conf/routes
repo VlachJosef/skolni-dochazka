@@ -15,18 +15,14 @@ GET     /not-authorized             securesocial.controllers.ProviderController.
 # Home page
 GET     /							controllers.Application.index
 GET		/trida/nova				 	controllers.TridaController.create
-GET		/trida/uprav			 	controllers.TridaController.edit
 GET		/trida/uprav/:uuidTrida	 	controllers.TridaController.editTrida(uuidTrida)
 POST	/trida					 	controllers.TridaController.save
-PUT		/trida						controllers.TridaController.update
+POST	/trida/:uuidTrida			controllers.TridaController.update(uuidTrida)
 DELETE	/trida						controllers.TridaController.delete
 
-GET		/zak/novy				 	controllers.ZakController.create
 GET		/zak/add/:uuidTrida		 	controllers.ZakController.add(uuidTrida)
-GET		/zak/uprav				 	controllers.ZakController.edit
-POST	/zak				 		controllers.ZakController.save
 GET		/zak/:uuidZak	 			controllers.ZakController.editZak(uuidZak)
-POST	/zak/update		 			controllers.ZakController.update
+POST	/zak			 			controllers.ZakController.update
 DELETE	/zak						controllers.ZakController.delete
 
 GET     /dochazka/summary			controllers.DochazkaController.summary
