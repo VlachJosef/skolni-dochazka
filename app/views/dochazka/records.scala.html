@@ -5,18 +5,32 @@
 
 @main("Docházka") {
 
-	@*@views.html.helper.error(zakForm)*@
-
-	<h3>Docházka třídy @trida.nazev</h3>
-
-	<a href="@routes.DochazkaController.evidujDochazkuByUUIDTrida(trida.uuidTrida.get.toString)">@Messages("pridat.den")</a>
+	<h3 class="text-center">Třída @trida.nazev</h3>
+	<hr/>
 
 	@for(d <- chartData) {
 		<div id="container-@d.zak.uuidZak" style="height: 200px; margin: auto; min-width: 310px;"></div>
 		<script type="text/javascript">
-	var chart;
 	$(function() {
+		Highcharts.theme = {
+		  chart: {
+		      backgroundColor: {
+		         linearGradient: [0, 0, 300, 300],
+		         stops: [
+		            [0, 'rgb(255, 255, 255)'],
+		            [1, 'rgb(240, 240, 240)']
+		         ]
+		      }
+			}
+		}
+		Highcharts.setOptions(Highcharts.theme);
 		$('#container-@d.zak.uuidZak').highcharts({
+			exporting: {
+	            enabled: false
+	        },
+			legend: {
+				enabled : false
+			},
 			chart: {
 				zoomType: 'xy'
 			},
@@ -84,5 +98,6 @@
 		});
 	});
 	</script>
+	<br/>
 	}
 }

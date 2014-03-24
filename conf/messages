@@ -1,3 +1,8 @@
+securesocial.login.title=Přihlášení
+securesocial.login.instructions=Pro přihlášení klikněte na ikonu Facebooku a zadejte své přihlašovací údaje
+
+securesocial.loginRequired=Pro přístup na tuto stránku musíte být přihlášeni
+
 error.required=Pole {0} je povinné
 error.nazevTridy.already.exists=Název třídy {1} již existuje
 error.expected.jodadate.format=Vyplňte prosím datum
@@ -7,7 +12,8 @@ error.denDochazky.required=Vyplňte prosím den docházky
 error.update.dochazka.day=Chyba při pokusu o aktualizování dnu docházky 
 error.delete.dochazka.day=Chyba při pokusu o smazání dnu docházky
 
-brand=Docházka
+brand=Školní Docházka
+administration=Administrace
 
 legend.trida.nova=Nová třída
 legend.trida.edit=Uprav třídu
@@ -35,7 +41,7 @@ question.delete.backup=Přejete si smazat zálohu?
 question.restore.backup=Pozor, obnovením zálohy aplikace dojde k vymazání aktuálního stavu aplikace. Přejete si obnovit zálohu?
 success.delete.backup=Záloha {0} byla úspěšně smazána
 success.restore.backup=Záloha {0} byla úspěšně obnovena
-success.update.dochazka.day=Den docházka byl úspěšně aktualizován
+success.update.dochazka.day=Den docházky byl úspěšně aktualizován
 success.delete.dochazka.day=Den docházka byl úspěšně smazán
 
 question.delete.tridy=Smazáním třídy dojde i ke smazání všech žáků. Přejete si pokračovat?

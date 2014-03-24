@@ -23,7 +23,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.i18n.Messages
 
-object ZakController extends Controller {
+object ZakController extends Controller with DochazkaSecured {
 
   val zakMapping = mapping(
     "uuidZak" -> optional(UUIDMapping.uuidType),
@@ -33,11 +33,11 @@ object ZakController extends Controller {
 
   val zakForm = Form(zakMapping)
 
-  def create = Action { implicit request =>
+  def create = DochazkaSecuredAction { implicit request =>
     Ok(views.html.zak.create(zakForm, routes.ZakController.save, Application.getSelectableTridy()))
   }
 
-  def save = Action { implicit request =>
+  def save = DochazkaSecuredAction { implicit request =>
     val form = zakForm.bindFromRequest
     form.fold(
       formWithErrors => {
@@ -63,7 +63,7 @@ object ZakController extends Controller {
       })
   }
 
-  def edit = Action {
+  def edit = DochazkaSecuredAction {  implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val skola = Skola.getSkola(client)
@@ -71,7 +71,7 @@ object ZakController extends Controller {
     }
   }
 
-  def editZak(uuidZak: String) = Action { implicit request =>
+  def editZak(uuidZak: String) = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val zak = Zak.getByUUIDZak(uuidZak, client)
@@ -79,7 +79,7 @@ object ZakController extends Controller {
     }
   }
 
-  def update = Action { implicit request =>
+  def update = DochazkaSecuredAction { implicit request =>
     val form = zakForm.bindFromRequest
     form.fold(
       formWithErrors => {
@@ -122,7 +122,7 @@ object ZakController extends Controller {
   implicit val zakReads: Reads[String] =
     (JsPath \ "uuidZak").read[String]
 
-  def delete = Action(parse.json) { implicit request =>
+  def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[String](zakReads).map { uuidZak =>
       {
         val pool = use[RedisPlugin].sedisPool

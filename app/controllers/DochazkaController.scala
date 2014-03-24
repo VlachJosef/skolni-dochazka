@@ -28,7 +28,7 @@ import model.Pritomnost
 import play.api.i18n.Messages
 import model.DochazkaUpdate
 
-object DochazkaController extends Controller {
+object DochazkaController extends Controller with DochazkaSecured {
 
   val dochazkaForDayForm = Form(
     mapping(
@@ -39,7 +39,15 @@ object DochazkaController extends Controller {
           "pocetHodin" -> play.api.data.Forms.of[Int])(Pritomnost.apply)(Pritomnost.unapply)
       })(Dochazka.apply)(Dochazka.unapply))
 
-  def prehledByUUIDTrida(uuidTrida: String) = Action {
+  def summary = DochazkaSecuredAction { implicit request =>
+    val pool = use[RedisPlugin].sedisPool
+    val skola = pool.withJedisClient { client =>
+      Skola.getSkola(client)
+    }
+    Ok(views.html.summary(skola))
+  }
+
+  def prehledByUUIDTrida(uuidTrida: String) = Action { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val trida = Trida.getByUUID(uuidTrida, client)
@@ -66,7 +74,7 @@ object DochazkaController extends Controller {
     }
   }
 
-  def evidujDochazkuByUUIDTrida(uuidTrida: String) = Action {
+  def evidujDochazkuByUUIDTrida(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val slozeniTridy = Skola.getSlozeniTridy(uuidTrida, client)
@@ -74,7 +82,7 @@ object DochazkaController extends Controller {
     }
   }
 
-  def save(uuidTrida: String) = Action { implicit request =>
+  def save(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
     val form = dochazkaForDayForm.bindFromRequest
     form.fold(
       formWithErrors => {
@@ -103,7 +111,7 @@ object DochazkaController extends Controller {
     (__ \ "uuidTrida").read[String] and
     (__ \ "dochazka").read[List[Pritomnost]])(Dochazka.apply _)
 
-  def put = Action(parse.json) { implicit request =>
+  def put = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[Dochazka](tridaReads).map { dochazka =>
       val pool = use[RedisPlugin].sedisPool
       pool.withJedisClient { client =>
@@ -133,7 +141,7 @@ object DochazkaController extends Controller {
     (__ \ "uuidZak").read[String] and
     (__ \ "pocetHodin").read[Int])(DochazkaUpdate.apply _)
 
-  def update = Action(parse.json) { implicit request =>
+  def update = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[DochazkaUpdate](updateReads).map { dochazkaUpdate =>
       val pool = use[RedisPlugin].sedisPool
       pool.withJedisClient { client =>
@@ -150,9 +158,9 @@ object DochazkaController extends Controller {
 
   implicit val deleteDayReads: Reads[(LocalDate, String)] = (
     (__ \ "den").read[LocalDate](localDateRead) and
-    (__ \ "uuidTrida").read[String] tupled)
+      (__ \ "uuidTrida").read[String] tupled)
 
-  def delete = Action(parse.json) { implicit request =>
+  def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[(LocalDate, String)](deleteDayReads).map { tuple =>
       val pool = use[RedisPlugin].sedisPool
       pool.withJedisClient { client =>
@@ -166,5 +174,4 @@ object DochazkaController extends Controller {
       }
     }
   }
-
 }

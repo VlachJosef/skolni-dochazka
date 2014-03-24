@@ -31,22 +31,11 @@
 		    <a class="navbar-brand" href="@routes.Application.index">@Messages("brand")</a>
 		  </div>
 		  <div class="collapse navbar-collapse">
-		    <ul class="nav navbar-nav">
-		      <li class="dropdown">
-		        <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">@Messages("menu.administrace") <b class="caret"></b></a>
-		        <ul class="dropdown-menu">
-		          <li><a href="#">@Messages("menu.user.create")</a></li>
-		          <li><a href="#">@Messages("menu.user.search")</a></li>
-		        </ul>
-		      </li>
-		    </ul>
 		    <ul class="nav navbar-nav navbar-right">
 		      <li class="dropdown">
-		        <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">Josef Vlach <b class="caret"></b></a>
+		        <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"><span class="glyphicon glyphicon-bell"></span></b></a>
 		        <ul class="dropdown-menu">
-		          <li><a href="#">@Messages("menu.user.password.change")</a></li>
-		          <li class="divider"></li>
-		          <li><a href="#">@Messages("menu.user.logout")</a></li>
+		          <li><a href="@routes.DochazkaController.summary">@Messages("administration")</a></li>
 		        </ul>
 		      </li>
 		    </ul>

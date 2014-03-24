@@ -22,11 +22,11 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.i18n.Messages
 
-object BackupController extends Controller {
+object BackupController extends Controller with DochazkaSecured {
 
   val dumpsDirName = "dumps"
 
-  def backup = Action {
+  def backup = DochazkaSecuredAction { implicit request =>
     getOrCreateDumpsDir() match {
       case Some(dir) => {
         val dumpFiles = dir.listFiles();
@@ -37,25 +37,22 @@ object BackupController extends Controller {
     }
   }
 
-  def dump() = Action {
+  def dump() = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val keys = client.keys("*")
-      getOrCreateDumpsDir() match {
-        case Some(dir) => {
-          val localDateDir = new File(dir.getPath + "/" + LocalDateTime.now.toString)
-          localDateDir.mkdir
-          keys.asScala.map(key => {
-            val dump = client.dump(key)
-            val fos: FileOutputStream = new FileOutputStream(localDateDir.getPath + "/" + key)
-            fos.write(dump, 0, dump.length);
-            fos.flush();
-            fos.close();
-          })
-          Redirect(routes.BackupController.backup)
-        }
-        case None => Ok("failed trying to create the directory for dump")
-      }
+      getOrCreateDumpsDir().map(dir => {
+        val localDateDir = new File(dir.getPath + "/" + LocalDateTime.now.toString)
+        localDateDir.mkdir
+        keys.asScala.map(key => {
+          val dump = client.dump(key)
+          val fos: FileOutputStream = new FileOutputStream(localDateDir.getPath + "/" + key)
+          fos.write(dump, 0, dump.length);
+          fos.flush();
+          fos.close();
+        })
+        Redirect(routes.BackupController.backup)
+      }).getOrElse(Ok("failed trying to create the directory for dump"))
     }
   }
 
@@ -77,25 +74,21 @@ object BackupController extends Controller {
     }
   }
 
-  def restore = Action(parse.json) { implicit request =>
+  def restore = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[String](backupReads).map { backup =>
       val pool = use[RedisPlugin].sedisPool
       pool.withJedisClient { client =>
-        getIfExistsBackupDir(backup) match {
-          case Some(dir) => {
-            client.flushDB
-            val dumpFiles = dir.listFiles();
-            dumpFiles.foreach(key => {
-              val ss = scala.io.Source.fromFile(key, "ISO8859-1")
-              val keyContents = ss.map(_.toByte).toArray
-              client.restore(key.getName, 0, keyContents)
-              ss.close
-            })
-            Ok(Json.obj("message" -> Messages("success.restore.backup", backup)))
-          }
-          case None =>
-            BadRequest(Json.obj("message" -> "Chyba při obnovování zálohy"))
-        }
+        getIfExistsBackupDir(backup).map(dir => {
+          client.flushDB
+          val dumpFiles = dir.listFiles();
+          dumpFiles.foreach(key => {
+            val ss = scala.io.Source.fromFile(key, "ISO8859-1")
+            val keyContents = ss.map(_.toByte).toArray
+            client.restore(key.getName, 0, keyContents)
+            ss.close
+          })
+          Ok(Json.obj("message" -> Messages("success.restore.backup", backup)))
+        }).getOrElse(BadRequest(Json.obj("message" -> "Chyba při obnovování zálohy")))
       }
     }.recoverTotal { e =>
       BadRequest(Json.obj("message" -> e.toString))
@@ -105,7 +98,7 @@ object BackupController extends Controller {
   implicit val backupReads: Reads[String] =
     (JsPath \ "backup").read[String]
 
-  def delete = Action(parse.json) { implicit request =>
+  def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[String](backupReads).map { backup =>
       getIfExistsBackupDir(backup) match {
         case Some(dir) => {

@@ -23,7 +23,7 @@ import play.api.libs.functional.syntax._
 import play.api.i18n.Messages
 import model.Zak
 
-object TridaController extends Controller {
+object TridaController extends Controller with DochazkaSecured {
 
   implicit object UUIDFormat extends Format[UUID] {
     def writes(uuid: UUID): JsValue = JsString(uuid.toString())
@@ -43,11 +43,11 @@ object TridaController extends Controller {
 
   val tridaForm = Form(tridaMapping)
 
-  def create = Action { implicit request =>
+  def create = DochazkaSecuredAction { implicit request =>
     Ok(views.html.trida.create(tridaForm, routes.TridaController.save))
   }
 
-  def save = Action { implicit request =>
+  def save = DochazkaSecuredAction { implicit request =>
     val form = tridaForm.bindFromRequest
     form.fold(
       formWithErrors => {
@@ -71,11 +71,11 @@ object TridaController extends Controller {
       })
   }
 
-  def edit = Action {
+  def edit = DochazkaSecuredAction { implicit request =>
     Ok(views.html.trida.edit(tridaForm, Application.getSelectableTridy()))
   }
 
-  def editTrida(uuidTrida: String) = Action { implicit request =>
+  def editTrida(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
     val pool = use[RedisPlugin].sedisPool
     pool.withJedisClient { client =>
       val trida = Trida.getByUUID(uuidTrida, client)
@@ -84,7 +84,7 @@ object TridaController extends Controller {
     }
   }
 
-  def update = Action(parse.json) { implicit request =>
+  def update = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[Trida].map {
       case Trida(Some(uuidTrida), nazev) => {
         val pool = use[RedisPlugin].sedisPool
@@ -120,7 +120,7 @@ object TridaController extends Controller {
       }
     }
   }
-  def delete = Action(parse.json) { implicit request =>
+  def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[Trida].map {
       case Trida(Some(uuidTrida), nazev) => {
         val pool = use[RedisPlugin].sedisPool

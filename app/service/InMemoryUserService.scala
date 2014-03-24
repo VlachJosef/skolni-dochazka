@@ -40,7 +40,8 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
 
   def find(id: IdentityId): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
-      Logger.debug("users = %s".format(users))
+      Logger.debug("users S = %s".format(users))
+      Logger.debug("id = %s".format(id))
     }
     val result = for (
       user <- users.values ;
@@ -53,7 +54,7 @@ class InMemoryUserService(application: Application) extends UserServicePlugin(ap
 
   def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = {
     if ( Logger.isDebugEnabled ) {
-      Logger.debug("users = %s".format(users))
+      Logger.debug("users X = %s".format(users))
     }
     val result = for (
       user <- users.values ;
