@@ -42,8 +42,7 @@ trait DochazkaSecured extends securesocial.core.SecureSocial {
     SecuredAction { implicit request =>
       val userName = request.user
       userName.email match {
-        case Some("vlach.josef@gmail.com") => f(request)
-        case Some("katkahlavacova@centrum.cz") => f(request)
+        case Some("vlach.josef@gmail.com") | Some("katkahlavacova@centrum.cz") => f(request)
         case Some(email) => {
           val pool = use[RedisPlugin].sedisPool
           pool.withJedisClient { client =>

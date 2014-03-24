@@ -37,8 +37,11 @@ zak.save=Založit žáka
 zak.update=Upravit žáka
 title.zaci=Žáci:
 
+vyuka=Výuka
+aktivity=Aktivity
 pridat.den=Přidat den
 pridat.zaka=Přidat žáka
+pridat.aktivity=Přidat aktivity
 
 question.delete.backup=Přejete si smazat zálohu?
 question.restore.backup=Pozor, obnovením zálohy aplikace dojde k vymazání aktuálního stavu aplikace. Přejete si obnovit zálohu?

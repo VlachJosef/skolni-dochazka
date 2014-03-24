@@ -12,17 +12,40 @@
 			<div id="gauge-@d.zak.uuidZak" ></div>
 		</div>
 		<div class="col-xs-4">
-			<table style="position:absolute; top: 80px;">
+			<table id="results">
 				<tbody>
 					<tr>
-						<th>Absence:</th>
-						<td>@d.absence %</td>
+						<th>Celková absence:</th>
+						<td>@d.summaryAbsence.absenceTotal %</td>
 					</tr>
 					<tr>
-						<th>Počet zameškaných hodin:</th>
-						<td>@d.zameskaneHodiny</td>
+						<th>Absence na výuce:</th>
+						<td>@d.summaryAbsence.summaryVyuka.absence %</td>
 					</tr>
-				</tbody>
+					<tr>
+						<th>Absence na aktivitách:</th>
+						<td>@d.summaryAbsence.summaryAktivity.absence %</td>
+					</tr>
+					<tr>
+						<th>Počet dnů výuky:</th>
+						<td>@d.summaryAbsence.summaryVyuka.pocetDnu</td>
+					</tr>
+					<tr>
+						<th>Počet dnů aktivit:</th>
+						<td>@d.summaryAbsence.summaryAktivity.pocetDnu</td>
+					</tr>
+					<tr>
+						<th>Zameškané hodiny výuky:</th>
+						<td>@d.summaryAbsence.summaryVyuka.zameskaneHodiny z @d.summaryAbsence.summaryVyuka.pocetHodin</td>
+					</tr>
+						<th>Zameškané hodiny aktivit:</th>
+						<td>@d.summaryAbsence.summaryAktivity.zameskaneHodiny z @d.summaryAbsence.summaryAktivity.pocetHodin</td>
+					</tr>
+					<tr>
+						<th>Zameškaných hodin celkem:</th>
+						<td>@d.summaryAbsence.zameskaneHodinyTotal z @d.summaryAbsence.pocetHodinyTotal</td>
+					</tr>
+				<zameskaneHodinyTotalbody>
 			</table>
 		</div>
 	</div>
@@ -99,8 +122,8 @@
 	        }],
 	        pane: 0,
 	        title: {
-	        	text: 'Absence %',
-	        	y: -40
+	        	text: 'Celková absence %',
+	        	y: -120
 	        }
 	    }],
 	    
@@ -116,8 +139,12 @@
 	    },
 	    	
 	    series: [{
-	        data: [@d.absence],
-	        yAxis: 0
+	        data: [@d.summaryAbsence.absenceTotal],
+	        yAxis: 0,
+	        name: 'Celková absence',
+	        tooltip: {
+	        	valueSuffix: ' %'
+			}
 	    }]
 	});
 		$('#container-@d.zak.uuidZak').highcharts({
@@ -191,9 +218,18 @@
 				yAxis: 1,
 				data: [@d.dochazkaData],
 				tooltip: {
+					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b><br/>'
+				}
+			},{
+				name: 'Aktivity',
+				color: '#A42CDB',
+				type: 'column',
+				yAxis: 1,
+				data: [@d.dnyAktivityData],
+				tooltip: {
 					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
 				}
-			}, {
+			},{
 				name: 'Celková absence od začátku roku',
 				color: '#89A54E',
 				type: 'spline',

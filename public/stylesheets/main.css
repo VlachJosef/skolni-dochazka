@@ -23,3 +23,17 @@ body {
 ul.hide-bullet li {
 	list-style-type: none;
 }
+
+th {
+	font-weight: normal;
+}
+
+#results {
+	position:absolute;
+	top: 10px;
+}
+
+#results td {
+	padding-left: 10px;
+	font-weight: bold;
+}

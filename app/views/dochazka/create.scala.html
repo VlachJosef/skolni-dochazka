@@ -1,13 +1,14 @@
-@(form: Form[model.Dochazka], slozeniTridy: model.SlozeniTridy, tbl : model.DochazkaTable)
+@(form: Form[model.Dochazka], slozeniTridy: model.SlozeniTridy, tbl : model.DochazkaTable, typVyuky: String)
 
 @import model.views._
 @import model.views.helper._
+@import model.FondHodin._
 
 @main("Docházka - přidat den") {
 
 	@views.html.helper.error(form)
 
-	<h3>Docházka třídy @slozeniTridy.trida.nazev</h3>
+	<h3>Docházka třídy @slozeniTridy.trida.nazev - @Messages(typVyuky)</h3>
 
 	<div class="alert alert-success" id="success" style="display: none;"></div>
 	<div class="alert alert-danger" id="danger" style="display: none;"></div>
@@ -46,7 +47,7 @@
 			@for((zak, index) <- slozeniTridy.zaci.zipWithIndex) {
 				<td>
 					@views.html.simple.hidden(form("dochazka[" + index + "].uuidZak"), zak.uuidZak.get.toString)
-					@views.html.simple.text(form("dochazka[" + index + "].pocetHodin"), showLabel = false, css="pocetHodin mask-pint", maxlength=1, defaultValue="4")
+					@views.html.simple.text(form("dochazka[" + index + "].pocetHodin"), showLabel = false, css="pocetHodin", maxlength=1, defaultValue=pocetHodinByTypVyuky(typVyuky).toString)
 			    </td>
 			}
 			</tr>
@@ -60,6 +61,8 @@
 	</div>
 	<script type="text/javascript">
 
+	$('.pocetHodin').keyfilter(/[0-@pocetHodinByTypVyuky(typVyuky)]/);
+
 	var smazDochazku = function(den) {
 		bootbox.setDefaults({locale: "cz"})
 		bootbox.confirm("@Messages("question.delete.denDochazky")", function(denDochazky) {
@@ -67,7 +70,7 @@
 				var uuidTrida = $('#uuidTrida').val();
 				var d = den.replace(/_/g, '.');
 				$.when(
-					appRoutes.controllers.DochazkaController.delete().ajax({
+					appRoutes.controllers.DochazkaController.delete('@typVyuky').ajax({
 						data: JSON.stringify({den: d, uuidTrida: uuidTrida}),
 						contentType: 'application/json'
 					})
@@ -95,7 +98,7 @@
 	    var data = {den: den, uuidZak: uuidZak, pocetHodin: _.parseInt(value)}
 	     
 	    $.when(
-			appRoutes.controllers.DochazkaController.update().ajax({
+			appRoutes.controllers.DochazkaController.update('@typVyuky').ajax({
 				data: JSON.stringify(data),
 				contentType: 'application/json'
 			})
@@ -125,7 +128,7 @@
 		};
 		var jsonObj = $('input').toObject(setting);
 		$.when(
-			appRoutes.controllers.DochazkaController.put().ajax({
+			appRoutes.controllers.DochazkaController.put('@typVyuky').ajax({
 				data: JSON.stringify(jsonObj),
 				contentType: 'application/json'
 			})

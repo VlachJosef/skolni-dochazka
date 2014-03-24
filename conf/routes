@@ -25,13 +25,13 @@ GET		/zak/:uuidZak	 			controllers.ZakController.editZak(uuidZak)
 POST	/zak			 			controllers.ZakController.update
 DELETE	/zak						controllers.ZakController.delete
 
-GET     /dochazka/summary			controllers.DochazkaController.summary
+GET     /dochazka/summary							controllers.DochazkaController.summary
+GET		/dochazka/edit/:uuidTrida/:typVyuky			controllers.DochazkaController.editDochazkaByUUIDTrida(uuidTrida, typVyuky)
 GET		/dochazka/:uuidTrida/:orderBy/:direction	controllers.DochazkaController.prehledByUUIDTridaOrdered(uuidTrida, orderBy, direction)
-GET		/dochazka/:uuidTrida		controllers.DochazkaController.prehledByUUIDTrida(uuidTrida)
-GET		/dochazka/edit/:uuidTrida	controllers.DochazkaController.editDochazkaByUUIDTrida(uuidTrida)
-PUT		/dochazka					controllers.DochazkaController.put
-PUT		/dochazka/update			controllers.DochazkaController.update
-DELETE	/dochazka					controllers.DochazkaController.delete
+GET		/dochazka/:uuidTrida						controllers.DochazkaController.prehledByUUIDTrida(uuidTrida)
+PUT		/dochazka					controllers.DochazkaController.put(typVyuky)
+PUT		/dochazka/update			controllers.DochazkaController.update(typVyuky)
+DELETE	/dochazka					controllers.DochazkaController.delete(typVyuky)
 GET		/sinners					controllers.DochazkaController.sinners
 
 GET		/backup						controllers.BackupController.backup
