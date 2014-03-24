@@ -30,19 +30,4 @@ object Application extends Controller {
     }
 
   }
-
-  def jsRoutes = Action { implicit request =>
-    val routes = Routes.javascriptRouter("appRoutes")(
-      controllers.routes.javascript.TridaController.editTrida,
-      controllers.routes.javascript.TridaController.update,
-      controllers.routes.javascript.TridaController.delete,
-      controllers.routes.javascript.ZakController.delete,
-      controllers.routes.javascript.BackupController.delete,
-      controllers.routes.javascript.BackupController.restore,
-      controllers.routes.javascript.DochazkaController.put,
-      controllers.routes.javascript.DochazkaController.update,
-      controllers.routes.javascript.DochazkaController.delete
-      )
-    Ok(routes).as("text/javascript")
-  }
 }

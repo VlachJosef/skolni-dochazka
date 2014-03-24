@@ -30,7 +30,7 @@ GET		/backup/dump				controllers.BackupController.dump
 PUT		/backup						controllers.BackupController.restore
 DELETE	/backup						controllers.BackupController.delete
 
-GET   	/assets/js/routes           controllers.Application.jsRoutes()
+GET   	/assets/js/routes           controllers.ApplicationRoutes.jsRoutes()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
