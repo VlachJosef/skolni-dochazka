@@ -13,9 +13,9 @@ import play.api.mvc.Action
 import play.api.mvc.Controller
 import model.views.Selectable
 
-object Application extends Controller {
+object Application extends Controller with securesocial.core.SecureSocial {
 
-  def index = Action {
+  def index = SecuredAction {
     val pool = use[RedisPlugin].sedisPool
     val skola = pool.withJedisClient { client =>
       Skola.getSkola(client)
