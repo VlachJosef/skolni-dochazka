@@ -1,0 +1,90 @@
+@(backups: Array[String])
+
+@import model.views._
+@import model.views.helper._
+
+@main("Docházka") {
+
+<p>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.BackupController.dump"><span class="glyphicon glyphicon-cloud-download"></span> @Messages("legend.backup.new")</a>
+</p>
+
+	<div class="alert alert-success" id="success" style="display: none;"></div>
+	<div class="alert alert-danger" id="danger" style="display: none;"></div>
+
+	<div class="col-sm-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Zálohy:</h3>
+			</div>
+			<div class="panel-body">
+	          	<ul>
+	 				@for(backup <- backups) {
+						<li id="cont-@OneTimeHelper.escapeDateString(backup)">
+							@backup
+							<span class="pull-right">
+								<a href="#" id="restore-@OneTimeHelper.escapeDateString(backup)"><span class="glyphicon glyphicon-cloud-upload"></span></a>
+								<a href="#" id="delete-@OneTimeHelper.escapeDateString(backup)"><span class="glyphicon glyphicon-trash"></span></a>
+							</span>
+						</li>
+						<script type="text/javascript">
+							$('#restore-@OneTimeHelper.escapeDateString(backup)').click(function() { restoreBackup($(this).attr('id')); });
+							$('#delete-@OneTimeHelper.escapeDateString(backup)').click(function() { deleteBackup($(this).attr('id')); });
+						</script>
+					}
+				</ul>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	var backupArr = new Array();
+	@for(backup <- backups) {
+		backupArr['@OneTimeHelper.escapeDateString(backup)'] = '@backup';
+	}
+	var restoreBackup = function(elementId) {
+		bootbox.setDefaults({locale: "cz"})
+		bootbox.confirm("@Messages("question.restore.backup")", function(result) {
+			if(result) {
+				var backupId = elementId.substring("restore-".length, elementId.length)
+				$.when(
+					appRoutes.controllers.BackupController.restore().ajax({
+						data: JSON.stringify({backup: backupArr[backupId]}),
+						contentType: 'application/json'
+					})
+				).then(function(resp) {
+					$('#danger').hide();
+					$('#success').show();
+					$('#success').html(resp.message);
+				}).fail(function(resp) {
+					$('#success').hide();
+					$('#danger').show();
+					$('#danger').html($.parseJSON(resp.responseText).message);
+				});
+			}
+		}); 
+	}
+	var deleteBackup = function(elementId) {
+		bootbox.setDefaults({locale: "cz"})
+		bootbox.confirm("@Messages("question.delete.backup")", function(result) {
+			if(result) {
+				var backupId = elementId.substring("delete-".length, elementId.length)
+				$.when(
+					appRoutes.controllers.BackupController.delete().ajax({
+						data: JSON.stringify({backup: backupArr[backupId]}),
+						contentType: 'application/json'
+					})
+				).then(function(resp) {
+					$('#danger').hide();
+					$('#success').show();
+					$('#success').html(resp.message);
+					$('#cont-'+backupId).remove();
+				}).fail(function(resp) {
+					$('#success').hide();
+					$('#danger').show();
+					$('#danger').html($.parseJSON(resp.responseText).message);
+				});
+			}
+		}); 
+	}
+	</script>
+}

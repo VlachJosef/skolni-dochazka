@@ -1,0 +1,174 @@
+@(form: Form[model.Dochazka], slozeniTridy: model.SlozeniTridy, tbl : model.DochazkaTable)
+
+@import model.views._
+@import model.views.helper._
+
+@main("Docházka") {
+
+	@views.html.helper.error(form)
+
+	<h3>Docházka třídy @slozeniTridy.trida.nazev</h3>
+
+	<div class="alert alert-success" id="success" style="display: none;"></div>
+	<div class="alert alert-danger" id="danger" style="display: none;"></div>
+
+	<table class="table" id="dochazkaTable">
+		<thead>
+			<tr>
+				<th>Den</th>
+			  	@for(header <- tbl.header.zaci) {
+			  	<th>@header.jmeno @header.prijmeni</th>
+		  		}
+			</tr>
+		</thead>
+		<tbody>
+			@for(data <- tbl.dnyData) {
+			<tr>
+				<td>@data.den</td>
+				@for(zak <- data.zaci) {
+				<td>
+					<span class="click">@zak.pocetHodin</span>
+				</td>
+				}
+				<td>
+					<a href="#" id="@OneTimeHelper.escapeDateString(data.den)"><span class="glyphicon glyphicon-trash"></span></a>
+					<script type="text/javascript">
+					$('#@OneTimeHelper.escapeDateString(data.den)').click(function() { smazDochazku($(this).attr('id')); });
+					</script>
+				</td>
+			</tr>
+			}
+			<tr>
+				<td>
+					@views.html.simple.text(form("den"), showLabel = false, placeholder="dd.mm.yyyy")
+					@views.html.simple.hidden(form("uuidTrida"), slozeniTridy.trida.uuidTrida.get.toString)
+				</td>
+			@for((zak, index) <- slozeniTridy.zaci.zipWithIndex) {
+				<td>
+					@views.html.simple.hidden(form("dochazka[" + index + "].uuidZak"), zak.uuidZak.get.toString)
+					@views.html.simple.text(form("dochazka[" + index + "].pocetHodin"), showLabel = false, css="pocetHodin mask-pint", maxlength=1)
+			    </td>
+			}
+			</tr>
+		</tbody>
+	</table>
+	<div class="form-group">
+		<div class="col-xs-7 text-right">
+			<a class="btn btn-default" href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTridy.trida.uuidTrida.get.toString)">@Messages("prerusit")</a>
+			<a class="btn btn-primary active" href="#" id="addNextDay" role="button">Uložit</a>
+		</div>
+	</div>
+	<script type="text/javascript">
+
+	var smazDochazku = function(den) {
+		bootbox.setDefaults({locale: "cz"})
+		bootbox.confirm("@Messages("question.delete.denDochazky")", function(denDochazky) {
+			if(denDochazky) {
+				var uuidTrida = $('#uuidTrida').val();
+				var d = den.replace(/_/g, '.');
+				$.when(
+					appRoutes.controllers.DochazkaController.delete().ajax({
+						data: JSON.stringify({den: d, uuidTrida: uuidTrida}),
+						contentType: 'application/json'
+					})
+				).then(function(resp) {
+					$('#danger').hide();
+					$('#success').show();
+					$('#success').html(resp.message);
+					$('#'+den).closest('tr').remove();
+				}).fail(function(resp) {
+					$('#success').hide();
+					$('#danger').show();
+					$('#danger').html($.parseJSON(resp.responseText).message);
+				});
+			}
+		}); 
+	}
+
+	$(".click").editable(function(value, settings) {
+		var td = $(this).parent();
+		var col = $(this).closest("td").index(); 
+		var row = $(this).closest("tr").index();
+		var den = $($(this).closest("tr").children()[0]).html();
+		var uuidZak = $('#dochazka_' + (col - 1) + '__uuidZak').val();
+	     
+	    var data = {den: den, uuidZak: uuidZak, pocetHodin: _.parseInt(value)}
+	     
+	    $.when(
+			appRoutes.controllers.DochazkaController.update().ajax({
+				data: JSON.stringify(data),
+				contentType: 'application/json'
+			})
+		).then(function(resp) {
+			console.log('OK');
+		}).fail(function(resp) {
+			$('#success').hide();
+			$('#danger').show();
+			$('#danger').html($.parseJSON(resp.responseText).message);
+		});
+	     
+		return(value);
+	}, { 
+		indicator : "<img src='img/indicator.gif'>",
+		tooltip   : "Click to edit...",
+		style  : "display: inline",
+		onblur : 'submit',
+		width  : "none",
+		height : "none",
+		processInput : function(input) {input.keyfilter(/[\d]/);}
+	});
+
+	$('#addNextDay').click(function() {
+		var setting = {
+        	mode: 'combine',
+        	skipEmpty: false
+		};
+		var jsonObj = $('input').toObject(setting);
+		$.when(
+			appRoutes.controllers.DochazkaController.put().ajax({
+				data: JSON.stringify(jsonObj),
+				contentType: 'application/json'
+			})
+		).then(function(resp) {
+			location.reload();
+		}).fail(function(resp) {
+			$('#success').hide();
+			$('#danger').show();
+			var json = $.parseJSON(resp.responseText);
+			var ids = json.message.map(function(m) {
+				var id = m.path.replace(/[\)\(\/]/g, '_').substring(1);
+				var index = id.substring(id.indexOf('_') + 1, id.indexOf('__'));
+				var message = m.message;
+				var result = {
+						"id" : id,
+						"index" : index,
+						"message" : message}
+				return result;
+			})
+			$('input').removeClass('error');
+			_(ids).forEach(function(obj) {
+				$('#'+obj.id).addClass('error');
+			});
+			var lis = _(ids).map(function(obj) {
+				if(obj.index) {
+					var zak = $($('#dochazkaTable thead tr th')[_.parseInt(obj.index)+1]).html()
+					return '<li>' + obj.message + " " + zak + '</li>';
+				} else {
+					return '<li>' + obj.message + '</li>';
+				}
+			}).join('');
+			$('#danger').html('<ul>' + lis + '</ul>');
+		});
+	});
+
+	$('#den').datepicker({
+	    format: "dd.mm.yyyy",
+	    weekStart: 1,
+	    todayBtn: "linked",
+	    language: "cs",
+	    daysOfWeekDisabled: "0,6",
+	    autoclose: true,
+	    todayHighlight: true
+	});
+	</script>
+}

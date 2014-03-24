@@ -1,0 +1,10 @@
+@(field: Field)
+
+@import model.views.helper._
+
+<label for="@field.id">@LabelHelper(field.name)</label>
+<input type="checkbox" 
+	name="@field.name"
+	id="@field.id"
+	value="true"
+	@if(field.value.isDefined && field.value.get == "true") {checked} />

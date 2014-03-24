@@ -1,6 +1,6 @@
-@(field: Field)
+@(field: Field, defaultValue: String = "")
 
 <input type="hidden"
 	id="@field.id"
 	name="@field.name"
-	value="@field.value.getOrElse("")"/>
+	value="@field.value.getOrElse(defaultValue)"/>

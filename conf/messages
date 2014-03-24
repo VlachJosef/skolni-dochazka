@@ -1,5 +1,11 @@
 error.required=Pole {0} je povinné
 error.nazevTridy.already.exists=Název třídy {1} již existuje
+error.expected.jodadate.format=Vyplňte prosím datum
+error.expected.jsnumber=Vyplňte prosím číslo {0}
+error.pocetHodin.required=Vyplňte prosím počet hodin pro žáka
+error.denDochazky.required=Vyplňte prosím den docházky
+error.update.dochazka.day=Chyba při pokusu o aktualizování dnu docházky 
+error.delete.dochazka.day=Chyba při pokusu o smazání dnu docházky
 
 brand=Docházka
 
@@ -14,12 +20,23 @@ trida.delete=Smazat třídu
 
 legend.zak.novy=Nový žák
 legend.zak.edit=Uprav žáka
+legend.backup=Zálohy
+legend.backup.new=Nová záloha
 jmeno=Jméno
 prijmeni=Příjmení
 uuidTrida=Třída
 zak.save=Založit žáka
 zak.update=Upravit žáka
 title.zaci=Žáci:
+
+pridat.den=Přidat den
+
+question.delete.backup=Přejete si smazat zálohu?
+question.restore.backup=Pozor, obnovením zálohy aplikace dojde k vymazání aktuálního stavu aplikace. Přejete si obnovit zálohu?
+success.delete.backup=Záloha {0} byla úspěšně smazána
+success.restore.backup=Záloha {0} byla úspěšně obnovena
+success.update.dochazka.day=Den docházka byl úspěšně aktualizován
+success.delete.dochazka.day=Den docházka byl úspěšně smazán
 
 question.delete.tridy=Smazáním třídy dojde i ke smazání všech žáků. Přejete si pokračovat?
 question.delete.zak=Opravdu si přejete smazat žáka?
@@ -30,3 +47,4 @@ error.minLength=Položka {0} musí být alespoň {1} znaků dlouhá
 error.already.exists={0} {1} již existuje
 error.trida.nenalezena=Třída s uuid {0} nenalezena
 error.zak.nenalezen=Žák s {0} nenalezen
+question.delete.denDochazky=Opravdu chcete smazat celý den docházky

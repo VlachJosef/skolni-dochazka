@@ -28,6 +28,7 @@ object Application extends Controller {
     pool.withJedisClient { client =>
       Selectable(Trida.getAll(client))((trida: Trida) => trida.uuidTrida.get.toString -> trida.nazev)
     }
+
   }
 
   def jsRoutes = Action { implicit request =>
@@ -35,7 +36,13 @@ object Application extends Controller {
       controllers.routes.javascript.TridaController.editTrida,
       controllers.routes.javascript.TridaController.update,
       controllers.routes.javascript.TridaController.delete,
-      controllers.routes.javascript.ZakController.delete)
+      controllers.routes.javascript.ZakController.delete,
+      controllers.routes.javascript.BackupController.delete,
+      controllers.routes.javascript.BackupController.restore,
+      controllers.routes.javascript.DochazkaController.put,
+      controllers.routes.javascript.DochazkaController.update,
+      controllers.routes.javascript.DochazkaController.delete
+      )
     Ok(routes).as("text/javascript")
   }
 }

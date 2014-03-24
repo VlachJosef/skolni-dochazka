@@ -1,0 +1,88 @@
+@(trida: model.Trida, chartData: List[model.Chart])
+
+@import model.views._
+@import model.views.helper._
+
+@main("Docházka") {
+
+	@*@views.html.helper.error(zakForm)*@
+
+	<h3>Docházka třídy @trida.nazev</h3>
+
+	<a href="@routes.DochazkaController.evidujDochazkuByUUIDTrida(trida.uuidTrida.get.toString)">@Messages("pridat.den")</a>
+
+	@for(d <- chartData) {
+		<div id="container-@d.zak.uuidZak" style="height: 200px; margin: auto; min-width: 310px;"></div>
+		<script type="text/javascript">
+	var chart;
+	$(function() {
+		$('#container-@d.zak.uuidZak').highcharts({
+			chart: {
+				zoomType: 'xy'
+			},
+			title: {
+				text: '@d.zak.jmeno @d.zak.prijmeni'
+			},
+			xAxis: [{
+				categories: [@Html(d.dnyData)]
+			}],
+			yAxis: [{ // Primary yAxis
+				labels: {
+					formatter: function() {
+						return this.value;
+					},
+					style: {
+						color: '#89A54E'
+					}
+				},
+				title: {
+					text: 'Absence',
+					style: {
+						color: '#89A54E'
+					}
+				}
+			}, { // Secondary yAxis
+				title: {
+					text: 'hodina/den',
+					style: {
+						color: '#4572A7'
+					}
+				},
+				labels: {
+					formatter: function() {
+						return this.value;
+					},
+					style: {
+						color: '#4572A7'
+					}
+				},
+				opposite: true
+			}],
+
+			tooltip: {
+				shared: true
+			},
+
+			series: [{
+				name: 'Docházka',
+				color: '#4572A7',
+				type: 'column',
+				yAxis: 1,
+				data: [@d.dochazkaData],
+				tooltip: {
+					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
+				}
+			}, {
+				name: 'Absence',
+				color: '#89A54E',
+				type: 'spline',
+				data: [@d.kumulativniAbsenceData],
+				tooltip: {
+					pointFormat: '<br/><span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
+				}
+			}]
+		});
+	});
+	</script>
+	}
+}

@@ -1,0 +1,15 @@
+@(field: Field, placeholder: String = "", showLabel: Boolean = true, css: String = "", maxlength:Int=0)
+
+@import model.views.helper._
+@if(showLabel) {
+	<label for="@field.id">@LabelHelper(field.name)</label>
+}
+<input type="text" 
+	class="@css"
+	id="@field.id" 
+	name="@field.name" 
+	value="@field.value.getOrElse("")"
+	placeholder="@placeholder"
+	@if(maxlength > 0) {
+		maxlength="@maxlength"
+	}/>

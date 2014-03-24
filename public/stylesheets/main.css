@@ -11,3 +11,11 @@ body {
 .alert-danger {
 	border-left: 3px solid #a94442;
 }
+
+.pocetHodin {
+	width: 70px;
+}
+
+.error {
+	border: 1px solid red;
+}

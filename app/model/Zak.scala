@@ -13,10 +13,11 @@ object Zak {
     sedis.sismember("zaci", uuidZak)
   }
 
-  def getByUUIDTrida(uuidTrida: String, client: Jedis): Set[Zak] =  {
+  def getByUUIDTrida(uuidTrida: String, client: Jedis): List[Zak] =  {
     val sedis = Dress.up(client)
-    val zaci = sedis.smembers(uuidTrida)
-    zaci.map(uuidZak => getByUUIDZak(uuidZak, client))
+    val uuidZaku = sedis.smembers(uuidTrida)
+    val zaci = uuidZaku.map(uuidZak => getByUUIDZak(uuidZak, client))
+    zaci.toList.sortBy(zak => zak.prijmeni)
   }
 
   def getByUUIDZak(uuidZak: String, client: Jedis): Zak = {

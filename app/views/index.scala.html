@@ -6,6 +6,7 @@
 	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.zak.novy")</a>
 	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.edit"><span class="glyphicon glyphicon-edit"></span> @Messages("legend.trida.edit")</a>
 	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.edit"><span class="glyphicon glyphicon-edit"></span> @Messages("legend.zak.edit")</a>
+	<a class="btn btn-danger btn-lg active" role="button" href="@routes.BackupController.backup"><span class="glyphicon glyphicon-transfer"></span> @Messages("legend.backup")</a>
 </p>
 <div class="row">
   	@for(slozeniTrid <- skola.slozeniTrid) {
@@ -15,7 +16,7 @@
 				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazev</h3>
 			</div>
 			<div class="panel-body">
-	         	@Messages("title.zaci")
+	         	<p>@Messages("title.zaci") <a href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)" class="pull-right"><span class="glyphicon glyphicon-time"></span> Docházka</a></p>
 	          	<ul>
 	 				@for(zak <- slozeniTrid.zaci) {
 						<li>@zak.jmeno @zak.prijmeni</li>
