@@ -3,13 +3,26 @@ error.nazevTridy.already.exists=Název třídy {1} již existuje
 
 brand=Docházka
 
-legend.trida.nova=Založení nové třídy
-nazevTridy=Název třídy
+legend.trida.nova=Nová třída
+legend.trida.edit=Uprav třídu
+legend.trida.update=Třída
+nazevTrida=Název třídy
 prerusit=Přerušit
 trida.save=Založit třídu
+trida.update=Upravit třídu
+trida.delete=Smazat třídu
 
-legend.zak.novy=Založení nového žáka
+legend.zak.novy=Nový žák
+legend.zak.edit=Uprav žáka
 jmeno=Jméno
 prijmeni=Příjmení
 uuidTrida=Třída
 zak.save=Založit žáka
+title.zaci=Žáci:
+
+question.delete.tridy=Smazáním třídy dojde i ke smazání všech žáků. Přejete si pokračovat?
+success.delete.tridy=Třída {0} byla úspěšně odstraněna
+success.zmena.nazev.tridy=Název třídy {0} změněn na {1} 
+error.minLength=Položka {0} musí být alespoň {1} znaků dlouhá
+error.already.exists={0} {1} již existuje
+error.trida.nenalezena=Třída s uuid {0} nenalezena

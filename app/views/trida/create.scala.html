@@ -1,4 +1,4 @@
-@(tridaForm: play.api.data.Form[String], call: play.api.mvc.Call)(implicit flash: Flash)
+@(tridaForm: play.api.data.Form[model.Trida], call: play.api.mvc.Call)(implicit flash: Flash)
 
 @import model.views._
 @import model.views.helper._
@@ -11,7 +11,7 @@
 		<fieldset>
 			<legend>@Messages("legend.trida.nova")</legend>
 			<div class="form-group">
-				@views.html.bootstrap3.text(tridaForm("nazevTridy"), ColumnWidth(2,5))
+				@views.html.bootstrap3.text(tridaForm("nazevTrida"), ColumnWidth(2,5))
 		    </div>
 			<div class="form-group">
 				<div class="col-xs-7 text-right">

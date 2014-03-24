@@ -1,5 +1,13 @@
 body {
-  padding-top: 70px;
-  padding-bottom: 30px;
-  min-width: 970px;
+	padding-top: 70px;
+	padding-bottom: 30px;
+	min-width: 970px;
+}
+
+.alert-success {
+	border-left: 3px solid #3c763d;
+}
+
+.alert-danger {
+	border-left: 3px solid #a94442;
 }

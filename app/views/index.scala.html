@@ -2,18 +2,20 @@
 
 @main("Welcome to Play") {
 <p>
-	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> Založ novou třídu</a>
-	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.create"><span class="glyphicon glyphicon-plus"></span> Založ nového žáka</a>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.trida.nova")</a>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.zak.novy")</a>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.edit"><span class="glyphicon glyphicon-edit"></span> @Messages("legend.trida.edit")</a>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.edit"><span class="glyphicon glyphicon-edit"></span> @Messages("legend.zak.edit")</a>
 </p>
 <div class="row">
   	@for(slozeniTrid <- skola.slozeniTrid) {
 	<div class="col-sm-4">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazevTridy</h3>
+				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazev</h3>
 			</div>
 			<div class="panel-body">
-	         	Žáci:
+	         	@Messages("title.zaci")
 	          	<ul>
 	 				@for(zak <- slozeniTrid.zaci) {
 						<li>@zak.jmeno @zak.prijmeni</li>

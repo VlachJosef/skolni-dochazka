@@ -14,6 +14,7 @@ import model.mappings.UUIDMapping
 import model.views.Selectable
 import play.api.Play.current
 import play.api.data.Form
+import play.api.data.Forms._
 import play.api.data.Forms.mapping
 import play.api.data.Forms.nonEmptyText
 import play.api.data.Forms.optional
@@ -21,6 +22,7 @@ import play.api.mvc.Action
 import play.api.mvc.Controller
 
 object ZakController extends Controller {
+
   val zakMapping = mapping(
     "uuidZak" -> optional(UUIDMapping.uuidType),
     "jmeno" -> nonEmptyText,
@@ -29,22 +31,15 @@ object ZakController extends Controller {
 
   val zakForm = Form(zakMapping)
 
-  private def getSelectableTridy() = {
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      Selectable(Trida.getAll(client))((trida: Trida) => trida.uuidTrida.toString -> trida.nazevTridy)
-    }
-  }
-
   def create = Action { implicit request =>
-    Ok(views.html.zak.create(zakForm, routes.ZakController.save, getSelectableTridy()))
+    Ok(views.html.zak.create(zakForm, routes.ZakController.save, Application.getSelectableTridy()))
   }
 
   def save = Action { implicit request =>
     val form = zakForm.bindFromRequest
     form.fold(
       formWithErrors => {
-        Ok(views.html.zak.create(formWithErrors, routes.ZakController.save, getSelectableTridy()))
+        Ok(views.html.zak.create(formWithErrors, routes.ZakController.save, Application.getSelectableTridy()))
       },
       zak => {
         val pool = use[RedisPlugin].sedisPool
@@ -66,4 +61,7 @@ object ZakController extends Controller {
       })
   }
 
+  def edit = Action {
+    Ok("Zak edit")
+  }
 }

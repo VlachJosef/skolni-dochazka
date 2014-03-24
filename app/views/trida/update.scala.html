@@ -1,0 +1,87 @@
+@(tridaForm: play.api.data.Form[model.Trida], zaci: Set[model.Zak])(implicit flash: Flash)
+
+@import model.views._
+@import model.views.helper._
+
+@views.html.helper.error(tridaForm)
+
+<div class="alert alert-success" id="success" style="display: none;"></div>
+<div class="alert alert-danger" id="danger" style="display: none;"></div>
+
+<div class="form-horizontal" id="tridaForm">
+	<fieldset>
+		<legend>@Messages("legend.trida.update")</legend>
+		<div class="form-group">
+			@views.html.bootstrap3.text(tridaForm("nazevTrida"), ColumnWidth(2,5))
+			@views.html.bootstrap3.hidden(tridaForm("uuidTrida"))
+	    </div>
+		<div class="form-group">
+			<div class="col-xs-7 text-right">
+				<a class="btn btn-default" href="@routes.Application.index">@Messages("prerusit")</a>
+				<button class="btn btn-danger" id="tridaDelete" type="button">@Messages("trida.delete")</button>
+				<button class="btn btn-success" id="tridaUpdate" type="button">@Messages("trida.update")</button>
+			</div>
+		</div>
+	</fieldset>
+	<div class="col-sm-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">@Messages("title.zaci")</h3>
+			</div>
+			<div class="panel-body">
+	          	<ul>
+	 				@for(zak <- zaci) {
+						<li>@zak.jmeno @zak.prijmeni</li>
+					}
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$('#tridaUpdate').click(function() {
+		var nazevTrida = $('#nazevTrida').val();
+		var uuidTrida = $('#uuidTrida').val();
+		$.when(
+			appRoutes.controllers.TridaController.update().ajax({
+				data: JSON.stringify({uuidTrida: uuidTrida, nazevTrida: nazevTrida}),
+				contentType: 'application/json'
+			})
+		).then(function(resp) {
+			$('#danger').hide();
+			$('#success').show();
+			$('#success').html(resp.message);
+			$('option[value="' + resp.uuidTrida + '"]').html(resp.nazevTrida)
+		}).fail(function(resp) {
+			$('#success').hide();
+			$('#danger').show();
+			$('#danger').html($.parseJSON(resp.responseText).message);
+		});
+	});
+	$('#tridaDelete').click(function() {
+		bootbox.setDefaults({locale: "cz"})
+		bootbox.confirm("@Messages("question.delete.tridy")", function(result) {
+			if(result) {
+				var nazevTrida = $('#nazevTrida').val();
+				var uuidTrida = $('#uuidTrida').val();
+				$.when(
+					appRoutes.controllers.TridaController.delete().ajax({
+						data: JSON.stringify({uuidTrida: uuidTrida, nazevTrida: nazevTrida}),
+						contentType: 'application/json'
+					})
+				).then(function(resp) {
+					$('#danger').hide();
+					$('#success').show();
+					$('#success').html(resp.message);
+					$('option[value="' + resp.uuidTrida + '"]').remove();
+					$('#uuidTrida').val("");
+					$('#tridaForm').html("")
+				}).fail(function(resp) {
+					$('#success').hide();
+					$('#danger').show();
+					$('#danger').html($.parseJSON(resp.responseText).message);
+				});
+			}
+		}); 
+	});
+</script>
