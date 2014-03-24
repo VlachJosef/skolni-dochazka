@@ -1,7 +1,27 @@
-@(message: String)
+@(skola: model.Skola)
 
 @main("Welcome to Play") {
-	<div class="container">
-	    <h1>@message</h1>
+<p>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> Založ novou třídu</a>
+	<a class="btn btn-primary btn-lg active" role="button" href="@routes.ZakController.create"><span class="glyphicon glyphicon-plus"></span> Založ nového žáka</a>
+</p>
+<div class="row">
+  	@for(slozeniTrid <- skola.slozeniTrid) {
+	<div class="col-sm-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazevTridy</h3>
+			</div>
+			<div class="panel-body">
+	         	Žáci:
+	          	<ul>
+	 				@for(zak <- slozeniTrid.zaci) {
+						<li>@zak.jmeno @zak.prijmeni</li>
+					}
+				</ul>
+			</div>
+		</div>
 	</div>
+	}
+</div>
 }

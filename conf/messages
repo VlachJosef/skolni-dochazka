@@ -1,1 +1,15 @@
+error.required=Pole {0} je povinné
+error.nazevTridy.already.exists=Název třídy {1} již existuje
+
 brand=Docházka
+
+legend.trida.nova=Založení nové třídy
+nazevTridy=Název třídy
+prerusit=Přerušit
+trida.save=Založit třídu
+
+legend.zak.novy=Založení nového žáka
+jmeno=Jméno
+prijmeni=Příjmení
+uuidTrida=Třída
+zak.save=Založit žáka
