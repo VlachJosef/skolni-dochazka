@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.Application._
 import java.util.UUID
 import org.sedis.Dress
 import org.sedis.Dress.delegateToJedis
@@ -54,27 +55,27 @@ object TridaController extends Controller with DochazkaSecured {
         Ok(views.html.trida.create(formWithErrors, routes.TridaController.save))
       },
       trida => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          val nazevTridy = trida.nazev
-          if (Dress.up(client).sadd("tridy", nazevTridy) == 0) {
-            val errors = Seq(FormError("nazevTridy", "error.nazevTridy.already.exists", nazevTridy))
-            val formWithError = form.copy(errors = errors)
-            Ok(views.html.trida.create(formWithError, routes.TridaController.save))
-          } else {
-            val uuidTrida = UUID.randomUUID.toString
-            Dress.up(client).hset(s"trida:$nazevTridy", "uuid", uuidTrida)
-            Dress.up(client).hset(s"trida:$uuidTrida", "nazev", nazevTridy)
-            Redirect(routes.DochazkaController.summary())
+        jedisClient { implicit client =>
+          withSedis { sedis =>
+            val nazevTridy = trida.nazev
+            if (sedis.sadd("tridy", nazevTridy) == 0) {
+              val errors = Seq(FormError("nazevTridy", "error.nazevTridy.already.exists", nazevTridy))
+              val formWithError = form.copy(errors = errors)
+              Ok(views.html.trida.create(formWithError, routes.TridaController.save))
+            } else {
+              val uuidTrida = UUID.randomUUID.toString
+              sedis.hset(s"trida:$nazevTridy", "uuid", uuidTrida)
+              sedis.hset(s"trida:$uuidTrida", "nazev", nazevTridy)
+              Redirect(routes.DochazkaController.summary())
+            }
           }
         }
       })
   }
 
   def editTrida(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val trida = Trida.getByUUID(uuidTrida, client)
+    jedisClient { implicit client =>
+      val trida = Trida.getByUUID(uuidTrida)
       Ok(views.html.trida.update(tridaForm.fill(trida), routes.TridaController.update(uuidTrida)))
     }
   }
@@ -86,22 +87,23 @@ object TridaController extends Controller with DochazkaSecured {
         Ok(views.html.trida.update(formWithErrors, routes.TridaController.update(uuidTrida)))
       },
       trida => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          val nazevOld = Dress.up(client).hget(s"trida:$uuidTrida", "nazev")
-          val nazev = trida.nazev
-          if (nazev != nazevOld) {
-            if (Dress.up(client).sadd("tridy", nazev) == 0) {
-              BadRequest("Chyba pri prejmenovani Tridy")
+        jedisClient { implicit client =>
+          withSedis { sedis =>
+            val nazevOld = sedis.hget(s"trida:$uuidTrida", "nazev")
+            val nazev = trida.nazev
+            if (nazev != nazevOld) {
+              if (sedis.sadd("tridy", nazev) == 0) {
+                BadRequest("Chyba pri prejmenovani Tridy")
+              } else {
+                sedis.srem("tridy", nazevOld)
+                client.del(s"trida:$nazevOld")
+                sedis.hset(s"trida:$nazev", "uuid", uuidTrida.toString)
+                sedis.hset(s"trida:$uuidTrida", "nazev", nazev)
+                Redirect(routes.DochazkaController.summary()).flashing("okMsg" -> Messages("success.zmena.nazev.tridy", nazevOld, nazev))
+              }
             } else {
-              Dress.up(client).srem("tridy", nazevOld)
-              client.del(s"trida:$nazevOld")
-              Dress.up(client).hset(s"trida:$nazev", "uuid", uuidTrida.toString)
-              Dress.up(client).hset(s"trida:$uuidTrida", "nazev", nazev)
-              Redirect(routes.DochazkaController.summary()).flashing("okMsg" -> Messages("success.zmena.nazev.tridy", nazevOld, nazev))
+              Redirect(routes.DochazkaController.summary())
             }
-          } else {
-            Redirect(routes.DochazkaController.summary())
           }
         }
       })
@@ -110,17 +112,18 @@ object TridaController extends Controller with DochazkaSecured {
   def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[Trida].map {
       case Trida(Some(uuidTrida), nazev) => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          val nazevOld = Dress.up(client).hget(s"trida:$uuidTrida", "nazev")
-          if (nazevOld != null) {
-            Trida.deleteByUUID(uuidTrida.toString, client)
-            Ok(Json.obj(
-              "nazevTrida" -> nazev,
-              "uuidTrida" -> uuidTrida,
-              "message" -> Messages("success.delete.tridy", nazev)))
-          } else {
-            BadRequest(Json.obj("message" -> Messages("error.trida.nenalezena", uuidTrida)))
+        jedisClient { implicit client =>
+          withSedis { sedis =>
+            val nazevOld = sedis.hget(s"trida:$uuidTrida", "nazev")
+            if (nazevOld != null) {
+              Trida.deleteByUUID(uuidTrida.toString)
+              Ok(Json.obj(
+                "nazevTrida" -> nazev,
+                "uuidTrida" -> uuidTrida,
+                "message" -> Messages("success.delete.tridy", nazev)))
+            } else {
+              BadRequest(Json.obj("message" -> Messages("error.trida.nenalezena", uuidTrida)))
+            }
           }
         }
       }

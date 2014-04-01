@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.Application.jedisClient
 import org.sedis.Dress
 import com.typesafe.plugin.RedisPlugin
 import com.typesafe.plugin.use
@@ -42,9 +43,8 @@ object DochazkaController extends Controller with DochazkaSecured {
       })(Dochazka.apply)(Dochazka.unapply))
 
   def summary = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    val skola = pool.withJedisClient { client =>
-      Skola.getSkola(client)
+    val skola = jedisClient { implicit client =>
+      Skola.getSkola
     }
     Ok(views.html.summary(skola))
   }
@@ -53,10 +53,9 @@ object DochazkaController extends Controller with DochazkaSecured {
   def Desc[T: Ordering] = implicitly[Ordering[T]].reverse
 
   def prehledByUUIDTridaOrdered(uuidTrida: String, orderBy: String, direction: String) = Action { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val trida = Trida.getByUUID(uuidTrida, client)
-      val chartsData = Chart.get(uuidTrida, client)
+    jedisClient { implicit client =>
+      val trida = Trida.getByUUID(uuidTrida)
+      val chartsData = Chart.get(uuidTrida)
 
       val sorted = chartsData.sortBy(ch => {
         orderBy match {
@@ -74,21 +73,19 @@ object DochazkaController extends Controller with DochazkaSecured {
   val formatter = DateTimeFormat.forPattern("dd.MM.yyyy")
 
   def prehledByUUIDTrida(uuidTrida: String) = Action { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val trida = Trida.getByUUID(uuidTrida, client)
-      val chartsData = Chart.get(uuidTrida, client)
+    jedisClient { implicit client =>
+      val trida = Trida.getByUUID(uuidTrida)
+      val chartsData = Chart.get(uuidTrida)
 
       Ok(views.html.dochazka.records(trida, chartsData))
     }
   }
 
   def editDochazkaByUUIDTrida(uuidTrida: String, typVyuky: String) = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val slozeniTridy = Skola.getSlozeniTridy(uuidTrida, client)
+    jedisClient { implicit client =>
+      val slozeniTridy = Skola.getSlozeniTridy(uuidTrida)
       val slozeniTridyFilter = slozeniTridy.copy(zaci = slozeniTridy.zaci.filter(Dochazka.aktivityFilter(typVyuky)))
-      val dochazkaTable = Dochazka.getDochazkaTable(uuidTrida, typVyuky, client)
+      val dochazkaTable = Dochazka.getDochazkaTable(uuidTrida, typVyuky)
       val dochazkaTableFilter = dochazkaTable.copy(header = dochazkaTable.header.copy(zaci = dochazkaTable.header.zaci.filter(Dochazka.aktivityFilter(typVyuky))))
       Ok(views.html.dochazka.create(dochazkaForDayForm, slozeniTridyFilter, dochazkaTableFilter, typVyuky))
     }
@@ -106,9 +103,8 @@ object DochazkaController extends Controller with DochazkaSecured {
 
   def put(typVyuky: String) = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[Dochazka](tridaReads).map { dochazka =>
-      val pool = use[RedisPlugin].sedisPool
-      pool.withJedisClient { client =>
-        Dochazka.saveDochazka(dochazka, typVyuky, client)
+      jedisClient { implicit client =>
+        Dochazka.saveDochazka(dochazka, typVyuky)
         Ok(Json.obj("message" -> Messages("success.delete.backup")))
       }
     }.recoverTotal { e =>
@@ -136,9 +132,8 @@ object DochazkaController extends Controller with DochazkaSecured {
 
   def update(typVyuky: String) = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[DochazkaUpdate](updateReads).map { dochazkaUpdate =>
-      val pool = use[RedisPlugin].sedisPool
-      pool.withJedisClient { client =>
-        Dochazka.updateDochazka(dochazkaUpdate, typVyuky, client)
+      jedisClient { implicit client =>
+        Dochazka.updateDochazka(dochazkaUpdate, typVyuky)
         Ok(Json.obj("message" -> Messages("success.update.dochazka.day")))
       }
     }.recoverTotal { e =>
@@ -155,9 +150,8 @@ object DochazkaController extends Controller with DochazkaSecured {
 
   def delete(typVyuky: String) = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[(LocalDate, String)](deleteDayReads).map { tuple =>
-      val pool = use[RedisPlugin].sedisPool
-      pool.withJedisClient { client =>
-        Dochazka.deleteDay(tuple, typVyuky, client)
+      jedisClient { implicit client =>
+        Dochazka.deleteDay(tuple, typVyuky)
         Ok(Json.obj("message" -> Messages("success.delete.dochazka.day")))
       }
     }.recoverTotal { e =>
@@ -169,9 +163,8 @@ object DochazkaController extends Controller with DochazkaSecured {
   }
 
   def sinners = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val sinners = Sinner.allSinners(client)
+    jedisClient { implicit client =>
+      val sinners = Sinner.allSinners
       Ok(views.html.dochazka.sinners(sinners))
     }
   }

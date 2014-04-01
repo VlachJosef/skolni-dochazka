@@ -2,7 +2,6 @@ package model
 
 import java.util.Date
 import redis.clients.jedis.Jedis
-import org.sedis.Dress
 import org.joda.time.format.DateTimeFormat
 import com.github.nscala_time.time.Implicits._
 import org.joda.time.LocalDate
@@ -43,7 +42,7 @@ object Chart {
 
   val formatter = DateTimeFormat.forPattern("dd.MM.yyyy")
 
-  def get(uuidTrida: String, client: Jedis): List[model.Chart] = {
+  def get(uuidTrida: String)(implicit client: Jedis): List[model.Chart] = {
 
     def getPocetHodinZaDen(zak: Zak, dny: List[String], typVyuky: String): DenPocetHodin = {
       for (
@@ -76,9 +75,9 @@ object Chart {
       mapUnion.values.toList.sortBy(_.den)
     }
 
-    val zaci = Zak.getByUUIDTrida(uuidTrida, client);
-    val dnyVyuky = Dochazka.getDnyDochazkyByUUidTrida(uuidTrida, "vyuka", client).toList.sortBy(formatter.parseLocalDate(_))
-    val dnyAktivity = Dochazka.getDnyDochazkyByUUidTrida(uuidTrida, "aktivity", client).toList.sortBy(formatter.parseLocalDate(_))
+    val zaci = Zak.getByUUIDTrida(uuidTrida);
+    val dnyVyuky = Dochazka.getDnyDochazkyByUUidTrida(uuidTrida, "vyuka").toList.sortBy(formatter.parseLocalDate(_))
+    val dnyAktivity = Dochazka.getDnyDochazkyByUUidTrida(uuidTrida, "aktivity").toList.sortBy(formatter.parseLocalDate(_))
 
     val chartsData = zaci.map(zak => {
       val denPocetHodinVyuka = getPocetHodinZaDen(zak, dnyVyuky, "vyuka")

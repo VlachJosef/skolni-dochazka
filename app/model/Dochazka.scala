@@ -1,5 +1,6 @@
 package model
 
+import controllers.Application._
 import java.util.Date
 import redis.clients.jedis.Jedis
 import org.sedis.Dress
@@ -19,37 +20,39 @@ case class DochazkaTable(header: DochazkaTableHeader, dnyData: List[DochazkaTabl
 
 object Dochazka {
 
-   def aktivityFilter(typVyuky: String): Zak => Boolean = { zak => typVyuky match {
-        case "aktivity" => zak.aktivity
-        case _ => true
-      }
+  def aktivityFilter(typVyuky: String): Zak => Boolean = { zak =>
+    typVyuky match {
+      case "aktivity" => zak.aktivity
+      case _ => true
+    }
   }
 
   val formatter = DateTimeFormat.forPattern("dd.MM.yyyy")
 
-  def getDochazkaTable(uuidTrida: String, typVyuky: String, client: Jedis) = {
-    val sedis = Dress.up(client)
-    val dnyDochazky = this.getDnyDochazkyByUUidTrida(uuidTrida, typVyuky, client)
-    val zaci = Zak.getByUUIDTrida(uuidTrida, client).filter(aktivityFilter(typVyuky));
-    val dnyLocalDate = dnyDochazky.map(formatter.parseLocalDate(_)).toList.sorted
-    val tableBody = for (
-      den <- dnyLocalDate
-    ) yield {
-      val dochazkaZaka = for (
-        zak <- zaci
+  def getDochazkaTable(uuidTrida: String, typVyuky: String)(implicit client: Jedis) = {
+    withSedis { sedis =>
+      val dnyDochazky = this.getDnyDochazkyByUUidTrida(uuidTrida, typVyuky)
+      val zaci = Zak.getByUUIDTrida(uuidTrida).filter(aktivityFilter(typVyuky));
+      val dnyLocalDate = dnyDochazky.map(formatter.parseLocalDate(_)).toList.sorted
+      val tableBody = for (
+        den <- dnyLocalDate
       ) yield {
-        val denStr = den.toString("dd.MM.yyyy")
-        val pocetHodin = client.get(s"$typVyuky:$denStr:${zak.uuidZak.get.toString}")
-        DochazkaZaka(zak, pocetHodin.toInt)
+        val dochazkaZaka = for (
+          zak <- zaci
+        ) yield {
+          val denStr = den.toString("dd.MM.yyyy")
+          val pocetHodin = client.get(s"$typVyuky:$denStr:${zak.uuidZak.get.toString}")
+          DochazkaZaka(zak, pocetHodin.toInt)
+        }
+        DochazkaTableBody(den.toString("dd.MM.yyyy"), dochazkaZaka)
       }
-      DochazkaTableBody(den.toString("dd.MM.yyyy"), dochazkaZaka)
+      DochazkaTable(DochazkaTableHeader(zaci), tableBody)
     }
-    DochazkaTable(DochazkaTableHeader(zaci), tableBody)
   }
 
-  def updateDochazka(dochazkaUpdate: DochazkaUpdate, typVyuky: String, client: Jedis) = {
+  def updateDochazka(dochazkaUpdate: DochazkaUpdate, typVyuky: String)(implicit client: Jedis) = {
     val uuidZak = dochazkaUpdate.uuidZak
-    val sedis = Dress.up(client)
+
     val den = dochazkaUpdate.den.toString("dd.MM.yyyy")
 
     val exists = client.exists(s"$typVyuky:$den:$uuidZak")
@@ -61,37 +64,39 @@ object Dochazka {
     }
   }
 
-  def saveDochazka(dochazka: Dochazka, typVyuky: String, client: Jedis) = {
-    val uuidTrida = dochazka.uuidTrida
-    val sedis = Dress.up(client)
-    val den = dochazka.den.toString("dd.MM.yyyy")
+  def saveDochazka(dochazka: Dochazka, typVyuky: String)(implicit client: Jedis) = {
+    withSedis { sedis =>
+      val uuidTrida = dochazka.uuidTrida
 
-    if (!sedis.sismember(s"$typVyuky:$uuidTrida", den)) {
-      sedis.sadd(s"$typVyuky:$uuidTrida", den)
+      val den = dochazka.den.toString("dd.MM.yyyy")
+
+      if (!sedis.sismember(s"$typVyuky:$uuidTrida", den)) {
+        sedis.sadd(s"$typVyuky:$uuidTrida", den)
+      }
+      val doc = dochazka.hodiny
+      doc.map(pritomnost => {
+        val uuidZak = pritomnost.uuidZak
+        client.set(s"$typVyuky:$den:${pritomnost.uuidZak}", pritomnost.pocetHodin.toString)
+      })
     }
-    val doc = dochazka.hodiny
-    doc.map(pritomnost => {
-      val uuidZak = pritomnost.uuidZak
-      client.set(s"$typVyuky:$den:${pritomnost.uuidZak}", pritomnost.pocetHodin.toString)
-    })
   }
 
-  def getDnyDochazkyByUUidTrida(uuidTrida: String, typVyuky: String, client: Jedis): Set[String] = {
-    val sedis = Dress.up(client)
-    sedis.smembers(s"$typVyuky:$uuidTrida")
+  def getDnyDochazkyByUUidTrida(uuidTrida: String, typVyuky: String)(implicit client: Jedis): Set[String] = {
+    withSedis { _.smembers(s"$typVyuky:$uuidTrida") }
   }
 
-  def deleteDay(deleteDay: (LocalDate, String), typVyuky: String, client: Jedis) = {
+  def deleteDay(deleteDay: (LocalDate, String), typVyuky: String)(implicit client: Jedis) = {
     val den = deleteDay._1.toString("dd.MM.yyyy")
     val uuidTrida = deleteDay._2
-    val sedis = Dress.up(client)
 
-    val ismember = sedis.sismember(s"$typVyuky:$uuidTrida", den)
-    if (ismember) {
-      sedis.srem(s"$typVyuky:$uuidTrida", den)
-      // TODO a co taky smazat zaznamy vsech zaku??
-    } else {
-      println("ERROR, pokus o delete neexistujiciho zaznamu")
+    withSedis { sedis =>
+      val ismember = sedis.sismember(s"$typVyuky:$uuidTrida", den)
+      if (ismember) {
+        sedis.srem(s"$typVyuky:$uuidTrida", den)
+        // TODO a co taky smazat zaznamy vsech zaku??
+      } else {
+        println("ERROR, pokus o delete neexistujiciho zaznamu")
+      }
     }
   }
 }

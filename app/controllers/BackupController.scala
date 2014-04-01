@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.Application.jedisClient
 import org.sedis.Dress
 import com.typesafe.plugin.RedisPlugin
 import com.typesafe.plugin.use
@@ -38,8 +39,7 @@ object BackupController extends Controller with DochazkaSecured {
   }
 
   def dump() = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
+    jedisClient { client =>
       val keys = client.keys("*")
       getOrCreateDumpsDir().map(dir => {
         val localDateDir = new File(dir.getPath + "/" + LocalDateTime.now.toString)
@@ -76,8 +76,7 @@ object BackupController extends Controller with DochazkaSecured {
 
   def restore = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[String](backupReads).map { backup =>
-      val pool = use[RedisPlugin].sedisPool
-      pool.withJedisClient { client =>
+      jedisClient { client =>
         getIfExistsBackupDir(backup).map(dir => {
           client.flushDB
           val dumpFiles = dir.listFiles();

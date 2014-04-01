@@ -1,6 +1,8 @@
 package controllers
 
 import java.util.UUID
+
+import controllers.Application.jedisClient
 import org.sedis.Dress
 import org.sedis.Dress.delegateToJedis
 import com.typesafe.plugin.RedisPlugin
@@ -37,10 +39,9 @@ object ZakController extends Controller with DochazkaSecured {
   val zakForm = Form(zakMapping)
 
   def add(uuidTrida: String) = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val trida = Trida.getByUUID(uuidTrida, client)
-      val maxPoradoveCislo = Trida.getMaxPoradoveCisloZak(uuidTrida, client)
+    jedisClient { implicit client =>
+      val trida = Trida.getByUUID(uuidTrida)
+      val maxPoradoveCislo = Trida.getMaxPoradoveCisloZak(uuidTrida)
       val zak = Zak(None, "", "", maxPoradoveCislo, true, UUID.fromString(uuidTrida))
       Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.novy"))
     }
@@ -53,11 +54,10 @@ object ZakController extends Controller with DochazkaSecured {
         Ok(views.html.zak.update(formWithErrors, routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.edit"))
       },
       zak => {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
+        jedisClient { implicit client =>
           zak.uuidZak match {
-            case Some(_) => Zak.update(zak, client)
-            case None => Zak.save(zak, client)
+            case Some(_) => Zak.update(zak)
+            case None => Zak.save(zak)
           }
         }
         Redirect(routes.DochazkaController.summary())
@@ -65,9 +65,8 @@ object ZakController extends Controller with DochazkaSecured {
   }
 
   def editZak(uuidZak: String) = DochazkaSecuredAction { implicit request =>
-    val pool = use[RedisPlugin].sedisPool
-    pool.withJedisClient { client =>
-      val zak = Zak.getByUUIDZak(uuidZak, client)
+    jedisClient { implicit client =>
+      val zak = Zak.getByUUIDZak(uuidZak)
       Ok(views.html.zak.update(zakForm.fill(zak), routes.ZakController.update, Application.getSelectableTridy(), "legend.zak.edit"))
     }
   }
@@ -86,10 +85,9 @@ object ZakController extends Controller with DochazkaSecured {
   def delete = SecuredAction(ajaxCall = true)(parse.json) { implicit request =>
     request.body.validate[String](zakReads).map { uuidZak =>
       {
-        val pool = use[RedisPlugin].sedisPool
-        pool.withJedisClient { client =>
-          if (Zak.exists(uuidZak, client)) {
-            val zak = Zak.deleteByUUIDZak(uuidZak, client)
+        jedisClient { implicit client =>
+          if (Zak.exists(uuidZak)) {
+            val zak = Zak.deleteByUUIDZak(uuidZak)
             Ok(Json.obj(
               "uuidZak" -> uuidZak,
               "message" -> Messages("success.delete.zak", zak.jmeno + " " + zak.prijmeni)))
