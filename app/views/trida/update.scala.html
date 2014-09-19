@@ -3,7 +3,7 @@
 @import model.views._
 @import model.views.helper._
 
-@main("Docházka - " + Messages("legend.trida.update")) {
+@main(Messages("label.trida.update")) {
 	
 	@views.html.helper.error(tridaForm)
 	
@@ -27,7 +27,7 @@
 	</div>
 	<script type="text/javascript">
 		$('#tridaDelete').click(function() {
-			bootbox.setDefaults({locale: "cz"})
+			bootbox.setDefaults({locale: "en"})
 			bootbox.confirm("@Messages("question.delete.tridy")", function(result) {
 				if(result) {
 					var nazevTrida = $('#nazevTrida').val();

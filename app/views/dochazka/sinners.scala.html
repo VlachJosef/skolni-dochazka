@@ -1,8 +1,8 @@
 @(sinners: Set[String])
 
-@main("Docházka - Hříšníci") {
+@main(Messages("label.sinners")) {
 <div class="row">
-	<h3>Seznam emailů lidí, kteří se pokoušeli přihlásit do administrace</h3>
+	<h3>@Messages("sinners.list.description")</h3>
 	@views.html.sinnersList(sinners)
 </div>
 }

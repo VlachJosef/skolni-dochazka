@@ -1,6 +1,6 @@
 @(skola: model.Skola)
 
-@main("Školní docházka - přehled") {
+@main(Messages("label.summary")) {
   	@for(slozeniTrid <- skola.slozeniTrid) {
     <div class="list-group">
       <a href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)" class="list-group-item">

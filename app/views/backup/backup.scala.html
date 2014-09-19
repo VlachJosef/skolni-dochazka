@@ -3,7 +3,7 @@
 @import model.views._
 @import model.views.helper._
 
-@main("Docházka - zálohy") {
+@main(Messages("label.backup")) {
 
 <p>
 	<a class="btn btn-primary btn-lg active" role="button" href="@routes.BackupController.dump"><span class="glyphicon glyphicon-cloud-download"></span> @Messages("legend.backup.new")</a>
@@ -15,12 +15,12 @@
 	<div class="col-sm-4">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">Zálohy:</h3>
+				<h3 class="panel-title">@Messages("backup.backups")</h3>
 			</div>
 			<div class="panel-body">
 	          	<ul>
 	          		@if(backups.length == 0) {
-	          			<li>Žádná záloha není k dispozici</li>
+	          			<li>@Messages("backup.no.backups")</li>
 	          		}
 	 				@for(backup <- backups) {
 						<li id="cont-@OneTimeHelper.escapeDateString(backup)">
@@ -45,7 +45,7 @@
 		backupArr['@OneTimeHelper.escapeDateString(backup)'] = '@backup';
 	}
 	var restoreBackup = function(elementId) {
-		bootbox.setDefaults({locale: "cz"})
+		bootbox.setDefaults({locale: "en"})
 		bootbox.confirm("@Messages("question.restore.backup")", function(result) {
 			if(result) {
 				var backupId = elementId.substring("restore-".length, elementId.length)
@@ -67,7 +67,7 @@
 		}); 
 	}
 	var deleteBackup = function(elementId) {
-		bootbox.setDefaults({locale: "cz"})
+		bootbox.setDefaults({locale: "en"})
 		bootbox.confirm("@Messages("question.delete.backup")", function(result) {
 			if(result) {
 				var backupId = elementId.substring("delete-".length, elementId.length)

@@ -1,8 +1,8 @@
 @(sinners: Set[String])
 
-@main("Neoprávněný přístup zablokován") {
+@main(Messages("label.unauthorized.access")) {
 <div class="row">
-	<div class="alert alert-danger">Pokus o neoprávněný přístup byl zablokován, vaše údaje budou nahlášeny na cizineckou policii a budete deportován, společně s těmito hříšníky</div>
+	<div class="alert alert-danger">@Messages("unauthorized.access.sinners")</div>
 	@views.html.sinnersList(sinners)
 </div>
 }

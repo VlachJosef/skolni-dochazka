@@ -15,37 +15,37 @@
 			<table id="results">
 				<tbody>
 					<tr>
-						<th>Celková absence:</th>
+						<th>@Messages("summary.total.absence")</th>
 						<td>@d.summaryAbsence.absenceTotal %</td>
 					</tr>
 					<tr>
-						<th>Absence na výuce:</th>
+						<th>@Messages("summary.teaching.absence")</th>
 						<td>@d.summaryAbsence.summaryVyuka.absence %</td>
 					</tr>
 					<tr>
-						<th>Absence na aktivitách:</th>
+						<th>@Messages("summary.activity.absence")</th>
 						<td>@d.summaryAbsence.summaryAktivity.absence %</td>
 					</tr>
 					<tr>
-						<th>Počet dnů výuky:</th>
+						<th>@Messages("summary.days.of.teaching")</th>
 						<td>@d.summaryAbsence.summaryVyuka.pocetDnu</td>
 					</tr>
 					<tr>
-						<th>Počet dnů aktivit:</th>
+						<th>@Messages("summary.days.of.activities")</th>
 						<td>@d.summaryAbsence.summaryAktivity.pocetDnu</td>
 					</tr>
 					<tr>
-						<th>Zameškané hodiny výuky:</th>
-						<td>@d.summaryAbsence.summaryVyuka.zameskaneHodiny z @d.summaryAbsence.summaryVyuka.pocetHodin</td>
+						<th>@Messages("summary.hours.of.teaching.absence")</th>
+						<td>@d.summaryAbsence.summaryVyuka.zameskaneHodiny @Messages("from") @d.summaryAbsence.summaryVyuka.pocetHodin</td>
 					</tr>
-						<th>Zameškané hodiny aktivit:</th>
-						<td>@d.summaryAbsence.summaryAktivity.zameskaneHodiny z @d.summaryAbsence.summaryAktivity.pocetHodin</td>
+						<th>@Messages("summary.hours.of.activity.absence")</th>
+						<td>@d.summaryAbsence.summaryAktivity.zameskaneHodiny @Messages("from") @d.summaryAbsence.summaryAktivity.pocetHodin</td>
 					</tr>
 					<tr>
-						<th>Zameškaných hodin celkem:</th>
-						<td>@d.summaryAbsence.zameskaneHodinyTotal z @d.summaryAbsence.pocetHodinyTotal</td>
+						<th>@Messages("summary.hours.of.total.absence")</th>
+						<td>@d.summaryAbsence.zameskaneHodinyTotal @Messages("from") @d.summaryAbsence.pocetHodinyTotal</td>
 					</tr>
-				<zameskaneHodinyTotalbody>
+				</tbody>
 			</table>
 		</div>
 	</div>
@@ -122,7 +122,7 @@
 	        }],
 	        pane: 0,
 	        title: {
-	        	text: 'Celková absence %',
+	        	text: '@Messages("total.absence") %',
 	        	y: -120
 	        }
 	    }],
@@ -141,7 +141,7 @@
 	    series: [{
 	        data: [@d.summaryAbsence.absenceTotal],
 	        yAxis: 0,
-	        name: 'Celková absence',
+	        name: '@Messages("total.absence")',
 	        tooltip: {
 	        	valueSuffix: ' %'
 			}
@@ -176,14 +176,14 @@
 					}
 				},
 				title: {
-					text: 'Absence',
+					text: '@Messages("absence")',
 					style: {
 						color: '#89A54E'
 					}
 				}
 			}, { // Secondary yAxis
 				title: {
-					text: 'hodina/den',
+					text: '@Messages("hour.day")',
 					style: {
 						color: '#4572A7'
 					}
@@ -212,7 +212,7 @@
 		    },
 
 			series: [{
-				name: 'Docházka',
+				name: '@Messages("dochazka")',
 				color: '#4572A7',
 				type: 'column',
 				yAxis: 1,
@@ -221,7 +221,7 @@
 					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b><br/>'
 				}
 			},{
-				name: 'Aktivity',
+				name: '@Messages("activities")',
 				color: '#A42CDB',
 				type: 'column',
 				yAxis: 1,
@@ -230,7 +230,7 @@
 					pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y}</b> '
 				}
 			},{
-				name: 'Celková absence od začátku roku',
+				name: '@Messages("total.absence.from.beginning.of.year")',
 				color: '#89A54E',
 				type: 'spline',
 				data: [@d.kumulativniAbsenceData],

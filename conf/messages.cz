@@ -1,0 +1,104 @@
+dochazka=Docházka
+activities=Aktivity
+
+securesocial.login.title=Přihlášení
+securesocial.login.instructions=Při pokusu o neoprávněné přihlášení budete nahlášeni na cizineckou policii  
+
+securesocial.loginRequired=Pro přístup na tuto stránku musíte být přihlášeni
+
+error.required=Pole {0} je povinné
+error.nazevTridy.already.exists=Název třídy {1} již existuje
+error.expected.jodadate.format=Vyplňte prosím datum
+error.expected.jsnumber=Vyplňte prosím číslo {0}
+error.pocetHodin.required=Vyplňte prosím počet hodin pro žáka
+error.denDochazky.required=Vyplňte prosím den docházky
+error.update.dochazka.day=Chyba při pokusu o aktualizování dnu docházky 
+error.delete.dochazka.day=Chyba při pokusu o smazání dnu docházky
+
+brand=Školní Docházka
+administration=Upravit docházku
+
+legend.trida.nova=Nová třída
+legend.trida.edit=Uprav třídu
+legend.trida.update=Úprava třídy
+nazevTrida=Název třídy
+prerusit=Přerušit
+save=Uložit
+trida.save=Založit třídu
+trida.update=Upravit třídu
+trida.delete=Smazat třídu
+trida.name=Jméno třídy
+
+legend.zak.novy=Nový žák
+legend.zak.edit=Uprav žáka
+legend.backup=Zálohy
+legend.backup.new=Nová záloha
+legend.sinners=Hríšníci
+jmeno=Jméno
+prijmeni=Příjmení
+poradoveCislo=Pořadové číslo
+uuidTrida=Třída
+zak.save=Založit žáka
+zak.update=Upravit žáka
+title.zaci=Žáci:
+class.attendance=Docházka třídy
+
+vyuka=Výuka
+aktivity=Aktivity
+pridat.den=Přidat den
+pridat.zaka=Přidat žáka
+pridat.aktivity=Přidat aktivity
+
+backup.backups=Zálohy:
+backup.no.backups=Žádná záloha není k dispozici
+
+question.delete.backup=Přejete si smazat zálohu?
+question.restore.backup=Pozor, obnovením zálohy aplikace dojde k vymazání aktuálního stavu aplikace. Přejete si obnovit zálohu?
+success.delete.backup=Záloha {0} byla úspěšně smazána
+success.restore.backup=Záloha {0} byla úspěšně obnovena
+success.update.dochazka.day=Den docházky byl úspěšně aktualizován
+success.delete.dochazka.day=Den docházka byl úspěšně smazán
+
+question.delete.tridy=Smazáním třídy dojde i ke smazání všech žáků. Přejete si pokračovat?
+question.delete.zak=Opravdu si přejete smazat žáka?
+success.delete.tridy=Třída {0} byla úspěšně odstraněna
+success.zmena.nazev.tridy=Název třídy {0} změněn na {1}
+success.delete.zak=Žák {0} byl úspěšně odstraněn
+error.minLength=Položka {0} musí být alespoň {1} znaků dlouhá
+error.already.exists={0} {1} již existuje
+error.trida.nenalezena=Třída s uuid {0} nenalezena
+error.zak.nenalezen=Žák s {0} nenalezen
+question.delete.denDochazky=Opravdu chcete smazat celý den docházky
+
+label.attendance=Docházka - {0}
+label.summary=Školní docházka - přehled
+label.unauthorized.access=Neoprávněný přístup zablokován
+unauthorized.access.sinners=Pokus o neoprávněný přístup byl zablokován, vaše údaje budou nahlášeny na cizineckou policii a budete deportován, společně s těmito hříšníky
+label.administration=Docházka - administrace
+label.backup=Docházka - zálohy
+label.add.day=Docházka - přidat den
+label.attendance.of.class=Docházka - třídy {0}
+label.sinners=Docházka - hříšníci
+label.trida.nova=Docházka - nová třída
+label.trida.update=Docházka - úprava třídy
+
+absence=Absence
+total.absence=Celková absence
+hour.day=hodina/den
+total.absence.from.beginning.of.year=Celková absence od začátku roku
+summary.total.absence=Celková absence:
+summary.teaching.absence=Absence na výuce:
+summary.activity.absence=Absence na aktivitách:
+summary.days.of.teaching=Počet dnů výuky:
+summary.days.of.activities=Počet dnů aktivit:
+summary.hours.of.teaching.absence=Zameškané hodiny výuky:
+summary.hours.of.activity.absence=Zameškané hodiny aktivit:
+summary.hours.of.total.absence=Zameškaných hodin celkem:
+from=z
+day=Den
+class=Třída
+
+sort.ordinal=Seřadit podle pořadí
+sort.absence=Seřadit podle absence
+
+sinners.list.description=Seznam emailů lidí, kteří se pokoušeli přihlásit do administrace

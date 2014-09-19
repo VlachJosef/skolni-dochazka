@@ -1,6 +1,6 @@
 @(skola: model.Skola)(implicit flash: Flash)
 
-@main("Docházka - administrace") {
+@main(Messages("label.administration")) {
 <p>
 	<a class="btn btn-primary btn active" role="button" href="@routes.TridaController.create"><span class="glyphicon glyphicon-plus"></span> @Messages("legend.trida.nova")</a>
 	<a class="btn btn-primary btn active" role="button" href="@routes.DochazkaController.sinners"><span class="glyphicon glyphicon-fire"></span> @Messages("legend.sinners")</a>
@@ -19,13 +19,13 @@
 	<div class="col-sm-4">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">Jméno třídy: @slozeniTrid.trida.nazev
+				<h3 class="panel-title">@Messages("trida.name"): @slozeniTrid.trida.nazev
 					<span class="pull-right"><a href="@routes.TridaController.editTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-edit"></span></a>
 				</h3>
 			</div>
 			<div class="panel-body">
 				<div class="btn-group btn-group-justified">
-			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-time"></span> Docházka</a>
+			      <a class="btn btn-default" role="button" href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-time"></span> @Messages("dochazka")</a>
 			      <a class="btn btn-default" role="button" href="@routes.ZakController.add(slozeniTrid.trida.uuidTrida.get.toString)"><span class="glyphicon glyphicon-user"></span> @Messages("pridat.zaka")</a>
 			    </div>
 				<div class="btn-group btn-group-justified">
@@ -52,7 +52,7 @@
 </div>
 <script type="text/javascript">
 var smazZaka = function(uuidZak) {
-	bootbox.setDefaults({locale: "cz"})
+	bootbox.setDefaults({locale: "en"})
 	bootbox.confirm("@Messages("question.delete.zak")", function(result) {
 		if(result) {
 			$.when(

@@ -3,7 +3,7 @@
 @import model.views._
 @import model.views.helper._
 
-@main("Školní Docházka třídy " + trida.nazev) {
+@main(Messages("label.attendance.of.class", trida.nazev)) {
 
 	<div class="row">
 		<div style="position: absolute; top: 86px;">
@@ -17,14 +17,14 @@
 		</div>
 		<div class="btn-group" data-toggle="buttons">
 		  <label class="btn btn-default active" for="poradi">
-		    <input type="radio" name="orderBy" id="poradi" checked="checked">Seřadit podle pořadí</input>
+		    <input type="radio" name="orderBy" id="poradi" checked="checked">@Messages("sort.ordinal")</input>
 		  </label>
 		  <label class="btn btn-default" for="absence">
-		    <input type="radio" name="orderBy" id="absence">Seřadit podle absence</input>
+		    <input type="radio" name="orderBy" id="absence">@Messages("sort.absence")</input>
 		  </label>
 		</div>
 		</div>
-		<h3 class="text-center">Třída @trida.nazev</h3>
+		<h3 class="text-center">@Messages("class") @trida.nazev</h3>
 		<hr/>
 	</div>
 	<script type="text/javascript">
