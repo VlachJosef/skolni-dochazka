@@ -4,7 +4,7 @@
   	@for(slozeniTrid <- skola.slozeniTrid) {
     <div class="list-group">
       <a href="@routes.DochazkaController.prehledByUUIDTrida(slozeniTrid.trida.uuidTrida.get.toString)" class="list-group-item">
-        <h4 class="list-group-item-heading">Třída  @slozeniTrid.trida.nazev</h4>
+        <h4 class="list-group-item-heading">@Messages("class")  @slozeniTrid.trida.nazev</h4>
         <hr/>
         <ul class="hide-bullet">
 	 	@for(zak <- slozeniTrid.zaci) {
